@@ -72,7 +72,7 @@ class GeckoSimulationProblem(SimulationProblem):
         if constraints:
             for rId in list(constraints.keys()):
                 reac = model.reactions.get_by_id(rId)
-                reac.bounds(constraints.get(rId)[0], constraints.get(rId)[1])
+                reac.bounds = (constraints.get(rId)[0], constraints.get(rId)[1])
         self.constraints = constraints
 
         #scale the model
@@ -209,7 +209,8 @@ class StoicSimulationProblem(SimulationProblem):
             if constraints:
                 for rId in list(constraints.keys()):
                     reac = model.reactions.get_by_id(rId)
-                    reac.bounds(constraints.get(rId)[0], constraints.get(rId)[1])
+                    reac.bounds = (constraints.get(rId)[0], constraints.get(rId)[1])
+            self.constraints = constraints
         else:
             set_default_solver(solverId)
             #self.solver = solver_instance(model)
