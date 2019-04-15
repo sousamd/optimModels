@@ -376,10 +376,10 @@ class DecoderProtUnderOverExpression(Decoder):
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
         """
-        if isinstance(simulProblem, KineticSimulationProblem):
+        if isinstance(simulProblem, GeckoSimulationProblem):
             solDecoded = self.decode_candidate(candidate)
 
-            constraints = {"draw_prot"+k: v for k,v  in solDecoded}
+            constraints = {"draw_prot"+k: v for k,v  in solDecoded.items()}
             override = OverrideStoicSimulProblem(constraints=constraints)
         else:
             raise Exception ("Unknown simulation problem type by decoderUnderOverExpression")
