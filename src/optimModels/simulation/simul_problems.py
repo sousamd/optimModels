@@ -157,9 +157,9 @@ class GeckoSimulationProblem(SimulationProblem):
             new_constraints.update(self.constraints)
 
         with self.model:
-            for rId in list(self.constraints.keys()):
+            for rId in list(new_constraints.keys()):
                 reac = self.model.reactions.get_by_id(rId)
-                reac.bounds = (self.constraints.get(rId)[0] * GeckoConfigurations.SCALE_CONSTANT, self.constraints.get(rId)[1]* GeckoConfigurations.SCALE_CONSTANT)
+                reac.bounds = (new_constraints.get(rId)[0] * GeckoConfigurations.SCALE_CONSTANT, new_constraints.get(rId)[1]* GeckoConfigurations.SCALE_CONSTANT)
             solution = self.model.optimize()
         # print("simulation time ", time)
         status = solverStatus.UNKNOWN
