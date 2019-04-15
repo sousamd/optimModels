@@ -72,7 +72,7 @@ class GeckoSimulationProblem(SimulationProblem):
         if constraints:
             for rId in list(constraints.keys()):
                 reac = model.reactions.get_by_id(rId)
-                reac.bounds(constraints.get(rId)[0], constraints.get(rId)[1])
+                reac.bounds=(constraints.get(rId)[0], constraints.get(rId)[1])
         self.constraints = constraints
 
         #scale the model
@@ -185,7 +185,7 @@ class StoicSimulationProblem(SimulationProblem):
         This class contains all required information to perform a simulation of a stoichiometric metabolic model.
     """
 
-    def __init__(self, model, objective=None, minimize=False, constraints=None, solverId=StoicConfigurations.SOLVER,
+    def __init__(self, model, objective={}, minimize=False, constraints=None, solverId=StoicConfigurations.SOLVER,
                  method=StoicConfigurations.SOLVER_METHOD,  withCobraPy = False):
         """
         Create a StoicSimulationProblem instance.
@@ -209,7 +209,8 @@ class StoicSimulationProblem(SimulationProblem):
             if constraints:
                 for rId in list(constraints.keys()):
                     reac = model.reactions.get_by_id(rId)
-                    reac.bounds(constraints.get(rId)[0], constraints.get(rId)[1])
+                    reac.bounds = (constraints.get(rId)[0], constraints.get(rId)[1])
+            self.constraints=constraints
         else:
             set_default_solver(solverId)
             #self.solver = solver_instance(model)
