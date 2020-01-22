@@ -2,7 +2,7 @@ from random import Random
 from multiprocessing import cpu_count
 from inspyred import ec
 
-from optimModels.optimization import evaluators, generators, replacers, variators, observers
+from optimModels.optimization import  evaluators, generators, replacers, variators, observers
 from optimModels.simulation.simul_problems import KineticSimulationProblem
 from optimModels.utils.constantes import optimType
 
@@ -18,8 +18,8 @@ class EAConfigurations():
         self.POPULATION_SELECTED_SIZE = 50
         self.NUM_ELITES = 1
         self.CROSSOVER_RATE = 0.9
-        self.MUTATION_RATE = 0.1
-        self.NEW_CANDIDATES_RATE = 0.1
+        self.MUTATION_RATE = 0.4
+        self.NEW_CANDIDATES_RATE = 0.4
         self.TOURNAMENT_SIZE = 3
         self.NUM_CPUS = 2
         self.NUM_BEST_SOLUTIONS = 2
@@ -93,29 +93,28 @@ def run_optimization(optimProbConf, resultFile= None, isMultiProc=False, populat
         list: the individuals of the last population.
 
     """
-    #TODO consider the initial poputalion
 
     rand = Random()
-    my_ec = ec.EvolutionaryComputation(rand)
-    my_ec.selector = ec.selectors.tournament_selection
-    my_ec.replacer = replacers.new_candidates_no_duplicates_replacement
-    my_ec.terminator = ec.terminators.generation_termination
+    ea = ec.EvolutionaryComputation(rand)
+    ea.selector = ec.selectors.tournament_selection
+    ea.replacer = replacers.new_candidates_no_duplicates_replacement
+    ea.terminator = ec.terminators.generation_termination
 
     if resultFile is not None:
-        my_ec.observer = observers.save_all_results
+        ea.observer = observers.save_all_results
 
     if optimProbConf.type in [optimType.REACTION_KO, optimType.GENE_KO, optimType.MEDIUM, optimType.PROTEIN_KO]:
         # int set representation
         bounds = [0, len(optimProbConf.get_decoder().ids) - 1]
         myGenerator = generators.generator_single_int_set
-        my_ec.variator = [variators.uniform_crossover,
+        ea.variator = [variators.uniform_crossover,
                           variators.grow_mutation_intSetRep,
                           variators.shrink_mutation,
                           variators.single_mutation_intSetRep]
     elif optimProbConf.type == optimType.MEDIUM_REACTION_KO:
         bounds = [[0, 0], [len(optimProbConf.get_decoder().drains) - 1, len(optimProbConf.get_decoder().reactions) - 1]]
         myGenerator = generators.generator_tuple_int_set
-        my_ec.variator = [variators.uniform_crossover_tuple,
+        ea.variator = [variators.uniform_crossover_tuple,
                           variators.grow_mutation_tuple_intSetRep,
                           variators.shrink_mutation_tuple,
                           variators.single_mutation_tuple_intSetRep]
@@ -123,7 +122,7 @@ def run_optimization(optimProbConf, resultFile= None, isMultiProc=False, populat
         #tuple set representation
         bounds = [[0, 0], [len(optimProbConf.get_decoder().ids) - 1, len(optimProbConf.get_decoder().levels) - 1]]
         myGenerator = generators.generator_single_int_tuple
-        my_ec.variator = [variators.uniform_crossover_intTupleRep,
+        ea.variator = [variators.uniform_crossover_intTupleRep,
                           variators.grow_mutation_intTupleRep,
                           variators.shrink_mutation,
                           variators.single_mutation_intTupleRep]
@@ -138,7 +137,7 @@ def run_optimization(optimProbConf, resultFile= None, isMultiProc=False, populat
         except NotImplementedError:
             nprocs = config.NUM_CPUS
         print("number of proc" , nprocs)
-        final_pop = my_ec.evolve(generator=myGenerator,
+        final_pop = ea.evolve(generator=myGenerator,
                                  evaluator=evaluators.parallel_evaluation_mp,
                                  mp_evaluator=evaluators.evaluator,
                                  mp_nprocs = nprocs,
@@ -153,9 +152,10 @@ def run_optimization(optimProbConf, resultFile= None, isMultiProc=False, populat
                                  new_candidates_rate=config.NEW_CANDIDATES_RATE,
                                  configuration=optimProbConf,
                                  results_file=resultFile,
-                                 tournament_size=config.TOURNAMENT_SIZE)
+                                 tournament_size=config.TOURNAMENT_SIZE,
+                                 seeds=population)
     else:
-        final_pop = my_ec.evolve(generator=myGenerator,
+        final_pop = ea.evolve(generator=myGenerator,
                                  evaluator=evaluators.evaluator,
                                  bounder=ec.Bounder(bounds[0], bounds[1]),
                                  pop_size=config.POPULATION_SIZE,
@@ -168,6 +168,6 @@ def run_optimization(optimProbConf, resultFile= None, isMultiProc=False, populat
                                  new_candidates_rate=config.NEW_CANDIDATES_RATE,
                                  configuration=optimProbConf,
                                  results_file=resultFile,
-                                 tournament_size=config.TOURNAMENT_SIZE
-                                 )
+                                 tournament_size=config.TOURNAMENT_SIZE,
+                                 seeds=population)
     return final_pop

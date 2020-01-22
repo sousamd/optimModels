@@ -104,6 +104,3 @@ def _candidateInPopulation(candidate, population):
         if ind.candidate == candidate:
             return True
     return False
-
-
-

@@ -5,7 +5,8 @@ from framed.io.sbml import  _load_compartments, _load_metabolites, _load_reactio
 from framed.model.odemodel import ODEModel
 import re
 from  optimModels.utils.utils import MyTree
-
+import warnings
+#warnings.filterwarnings("ignore")
 
 
 def load_kinetic_model(filename, map=None):

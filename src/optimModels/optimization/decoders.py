@@ -4,6 +4,7 @@ from collections import OrderedDict
 from optimModels.simulation.simul_problems import KineticSimulationProblem, StoicSimulationProblem, GeckoSimulationProblem
 from optimModels.simulation.override_simul_problem import OverrideKineticSimulProblem, OverrideStoicSimulProblem
 from optimModels.utils.configurations import StoicConfigurations
+from framed.cobra.deletion import deleted_genes_to_reactions
 
 
 class Decoder:
@@ -67,15 +68,15 @@ class DecoderMediumLevels(Decoder):
         Returns: OverrideStoicSimulProblem instance
 
         """
-        uptake = self.decode_candidate(candidate)
-        drains = [r  for r in simulProblem.get_drains() if r not in simulProblem.get_constraints_reacs() and r not in simulProblem.objective.keys()]
+	uptake = self.decode_candidate(candidate)
+        drains = [r for r in simulProblem.get_drains() if r not in simulProblem.get_constraints_reacs() and r not in simulProblem.objective.keys()]
 
         if isinstance(simulProblem, StoicSimulationProblem):
             # close all drains to uptake and open only the reaction in candidate
             constraints = {}
             for rId in drains:
                 if rId in uptake.keys():
-                    constraints[rId] = (-1* uptake[rId],0)
+                    constraints[rId] = (-1 * uptake[rId],0)
                 else:
                     constraints[rId] = (0, StoicConfigurations.DEFAULT_UB)
             override = OverrideStoicSimulProblem(constraints=constraints)
@@ -123,6 +124,7 @@ class DecoderMediumReacKO(Decoder):
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
         """
+
         uptake, koReactions = self.decode_candidate(candidate)
 
         if isinstance(simulProblem, StoicSimulationProblem):
@@ -246,7 +248,6 @@ class DecoderReacKnockouts(Decoder):
 
         return override
 
-
 class DecoderReacUnderOverExpression(Decoder):
     def __init__(self, ids, levels):
         self.ids = ids
@@ -273,6 +274,7 @@ class DecoderReacUnderOverExpression(Decoder):
 
         Returns: List of tuples indexes of reactions.
         """
+
         result = [(self.ids.index(x), self.levels.index(y)) for x, y in identifiers.items()]
         return result
 
@@ -284,12 +286,124 @@ class DecoderReacUnderOverExpression(Decoder):
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
         """
+
+        solDecoded = self.decode_candidate(candidate)
         if isinstance(simulProblem, KineticSimulationProblem):
-            solDecoded = self.decode_candidate(candidate)
             override = OverrideKineticSimulProblem(factors=solDecoded)
-            return override
+        elif isinstance(simulProblem, StoicSimulationProblem):
+            fluxes_WT = simulProblem.wt_fluxes
+            constraints = {}
+            for rId in solDecoded.keys():
+                wt_flux = fluxes_WT.ssFluxesDistrib[rId]
+                uo_factor = solDecoded[rId]
+                if uo_factor <= 0:
+                    raise Exception ("Invalid over/under expressession factor")
+                elif uo_factor < 1:
+                    constraints[rId] = (0, wt_flux*uo_factor)
+                elif uo_factor > 1:
+                    constraints[rId] = (wt_flux*uo_factor,StoicConfigurations.DEFAULT_UB)
+            override = OverrideStoicSimulProblem(constraints=constraints)
         else:
             raise Exception ("Unknown simulation problem type by decoderUnderOverExpression")
+        return override
+
+class DecoderGeneKnockouts(Decoder):
+    def __init__(self, ids):
+        self.ids = ids #list of genes
+
+    def decode_candidate(self, candidate):
+        """ Convert the list of indexes into a list of identifiers.
+
+        Args:
+            candidate (list): indexes of genes.
+
+        Returns: list of genes identifiers.
+
+        """
+        result = [self.ids[x] for x in list(candidate)]
+        return result
+
+    def decode_candidate_ids_to_index(self, identifiers):
+        """
+        Convert the list of identifiers into a list of integers (indexes).
+
+        Args:
+            identifiers (list): Ids of genes
+
+        Returns: List of integers (genes indexes)
+
+        """
+        result = [self.ids.index(x) for x in identifiers]
+        return result
+
+    def get_override_simul_problem(self, candidate, simulProblem):
+        """ Build the override simulation problem which will contains the modifications that must be applied to the model in order to simulate the reactions knockouts.
+
+        Args:
+            candidate (list):  indexes of reactions.
+            simulProblem (SimulationProblem): all information required to perform a model simulation.
+
+        Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
+        """
+        genes_ko = self.decode_candidate(candidate)
+        proteins_ko = deleted_genes_to_reactions(simulProblem.model, genes_ko)
+
+        if isinstance(simulProblem, StoicSimulationProblem):
+            constraints = {reacId: (0, 0) for reacId in proteins_ko}
+            override = OverrideStoicSimulProblem(constraints=constraints)
+        else:
+            raise Exception("Unknown simulation problem type by DecoderGeneKnockouts.")
+
+        return override
+
+class DecoderGeneUnderOverExpression(Decoder):
+    def __init__(self, ids, levels):
+        self.ids = ids #list of genes
+        self.levels = levels
+
+    def decode_candidate(self, candidate):
+        """ Convert the list of indexes into a list of identifiers.
+
+        Args:
+            candidate (list): indexes of genes.
+
+        Returns: list of genes identifiers.
+
+        """
+        result = {self.ids[k]: self.levels[v] for (k, v) in list(candidate)}
+        return result
+
+    def decode_candidate_ids_to_index(self, identifiers):
+        """
+        Convert the list of identifiers into a list of integers (indexes).
+
+        Args:
+            identifiers (list): Ids of genes
+
+        Returns: List of integers (genes indexes)
+
+        """
+
+        result = [(self.ids.index(x), self.levels.index(y)) for x, y in identifiers.items()]
+        return result
+
+    def get_override_simul_problem(self, candidate, simulProblem):
+        """ Build the override simulation problem which will contains the modifications that must be applied to the model in order to simulate the reactions knockouts.
+
+        Args:
+            candidate (list):  indexes of reactions.
+            simulProblem (SimulationProblem): all information required to perform a model simulation.
+
+        Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
+        """
+	# TODO: verificar
+        genes_uo = self.decode_candidate(candidate)
+        constraints = gene_uo_to_reactions(genes_uo, simulProblem)
+        if isinstance(simulProblem, StoicSimulationProblem):
+            override = OverrideStoicSimulProblem(constraints=constraints)
+        else:
+            raise Exception('Unknown simulation problem type by DecoderGeneUnderOver.')
+        return override
 
 class DecoderProtKnockouts(Decoder):
     def __init__(self, ids):
@@ -329,9 +443,14 @@ class DecoderProtKnockouts(Decoder):
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
         """
-        ko = ["draw_prot_"+ p for p in self.decode_candidate(candidate)]
+        ko = []
+        for p in self.decode_candidate(candidate):
+            if 'draw_prot_'+ p in simulProblem.model.reactions:
+                 ko.append('draw_prot_'+ p)
+            else:
+                ko.append("prot_"+p+"_exchange")
 
-        if  isinstance(simulProblem, GeckoSimulationProblem):
+        if isinstance(simulProblem, GeckoSimulationProblem):
             constraints = {reacId:(0, 0) for reacId in ko}
             override = OverrideStoicSimulProblem(constraints=constraints)
         else:
@@ -365,10 +484,13 @@ class DecoderProtUnderOverExpression(Decoder):
 
         Returns: List of tuples indexes.
         """
-        result = [(self.ids.index(x), self.levels.index(y)) for x, y in identifiers.items()]
+
+        result = [(self.ids.index(x), self.levels.index(y[1])) for x, y in identifiers.items()]
         return result
 
     def get_override_simul_problem(self, candidate, simulProblem):
+
+
         """ Build the override simulation problem which will contains the modifications that must be applied to the model in order to simulate the under/over proteins expression.
         Args:
             candidate (dict):  candidate represented using proteins and levels indexes.
@@ -376,11 +498,109 @@ class DecoderProtUnderOverExpression(Decoder):
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
         """
+
         if isinstance(simulProblem, GeckoSimulationProblem):
             solDecoded = self.decode_candidate(candidate)
 
-            constraints = {"draw_prot"+k: v for k,v  in solDecoded.items()}
+            constraints = {}
+            for k,v in solDecoded.items():
+                lvl = v[1]
+                if 'draw_prot_'+k in simulProblem.model.reactions:  reac_name = 'draw_prot_' + k
+                else: reac_name = 'prot_' + k + '_exchange'
+
+                prot_wt = simulProblem.wt_concentrations[k]
+                if lvl == 0: constraints[reac_name] = (0, 0)
+                elif lvl < 1:
+                    if v[1] * prot_wt > 0:
+                        constraints[reac_name] = (0, lvl*prot_wt)
+                    else: constraints[reac_name] = (0, 0)
+                elif lvl > 1:
+                    constraints[reac_name] = (lvl*prot_wt, 10000)
+
             override = OverrideStoicSimulProblem(constraints=constraints)
         else:
             raise Exception ("Unknown simulation problem type by decoderUnderOverExpression")
         return override
+
+#auxiliar
+# TODO: verificar
+
+def gene_uo_to_reactions(genes_uo, simulProblem):
+    """
+    Convert the under/over expression of a gene to the associated reactions.
+    Args:
+        gene_uo (dict): {genes_id:level} --> obtained by the function decode_candidate
+        simulProblem (SimulationProblem): all information required to perform a model simulation; in this case to get the reactions
+    """
+    fluxes = simulProblem.wt_fluxes
+    internal_reactions = simulProblem.get_internal_reactions()
+    multi_reacs = []
+    constraints = {}
+
+    for rid in internal_reactions:
+        genes = simulProblem.model.reactions[rid].get_associated_genes()
+        if set(genes_uo).intersection(genes):
+            if len(genes) == 1:
+                constraints[rid] = genes_uo[list(genes)[0]] * fluxes.ssFluxesDistrib[rid]
+            else:
+                multi_reacs.append(simulProblem.model.reactions[rid])
+
+    for reac in multi_reacs:
+        gpr = reac.gpr.to_string()
+
+        if 'or' in gpr and 'and' not in gpr:
+            genes = gpr[-1:1].split(' or ')
+            if genes[0] in genes_uo:
+                level = genes_uo[genes[0]]
+            else:
+                level = 1
+            for i in range(1, len(genes)):
+                if genes[i] in genes_uo:
+                    level += genes_uo[genes[i]]
+                else:
+                    level += 1
+                level = level / 2
+
+            exp = level * fluxes.ssFluxesDistrib[reac.id]
+            constraints[reac.id] = exp
+
+        elif 'and' in gpr and 'or' not in gpr:
+            genes = gpr[-1:1].split(' and ')
+            exprs = []
+            for gene in genes:
+                if gene in genes_uo:
+                    exprs.append(genes_uo[gene])
+                else:
+                    exprs.append(1)
+
+            exp = min(exprs) * fluxes.ssFluxesDistrib[reac.id]
+            constraints[reac.id] = exp
+
+        else:
+            or_genes = gpr[-1:1].split(' or ')
+            final_level = -1
+            for elem in or_genes:
+                if 'and' not in elem:
+                    if elem in genes_uo:
+                        level = genes_uo[elem]
+                    else:
+                        level = 1
+                else:
+                    and_genes = elem[-1:1].split(' and ')
+                    exprs = []
+                    for gene in and_genes:
+                        if gene in genes_uo:
+                            exprs.append(genes_uo[gene])
+                        else:
+                            exprs.append(1)
+                    level = min(exprs)
+
+                if final_level == -1:
+                    final_level = level
+                else:
+                    final_level += level
+                    final_level = final_level / 2
+
+            exp = final_level * fluxes.ssFluxesDistrib[reac.id]
+            constraints[reac.id] = exp
+    return constraints

@@ -8,7 +8,7 @@ from optimModels.utils.configurations import GeckoConfigurations
 import itertools
 
 def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROTEIN_KO, criticalProteins=[], isMultiProc=False, candidateSize = None,
-                     resultFile=None, initPopFile=None):
+                     resultFile=None, initPopFile=None, eaConfig=EAConfigurations()):
     """
     Function to run the optimization process.
     Args:
@@ -31,17 +31,18 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
         decoder = DecoderProtKnockouts(list(idsToManipulate))
     elif type == optimType.PROTEIN_UO:
         if not levels:
-            raise Exception("The specification of levels for under/over optimizarion is required!")
+            raise Exception("The specification of levels for under/over optimization is required!")
         decoder = DecoderProtUnderOverExpression(idsToManipulate, levels)
+
 
     initPopulation = None
     if initPopFile is not None:
-        numGeneration, initPopulation = load_population(initPopFile, decoder)
+        _ , initPopulation = load_population(initPopFile, decoder)
 
     # build optimization configuration problem
-    eaConfig = EAConfigurations()
+    #eaConfig = EAConfigurations()
     if candidateSize:
-        eaConfig.MAX_CANDIDATE_SIZE = candidateSize;
+        eaConfig.MAX_CANDIDATE_SIZE = candidateSize
 
     optimProbConf = OptimProblemConfiguration(simulProblem, type=type, decoder=decoder, evaluationFunc=evaluationFunc,
                                               EAConfig=eaConfig, scaleProblem=GeckoConfigurations.SCALE_CONSTANT)
@@ -50,12 +51,14 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
     final_pop = run_optimization(optimProbConf, resultFile=resultFile, isMultiProc=isMultiProc,
                                  population=initPopulation)
 
+
+
     best_solutions = findBestSolutions(final_pop, eaConfig)
 
     # simplify solutions
     result = simplifySolutions(optimProbConf, best_solutions)
 
-    print_results(resultFile,final_pop,optimProbConf )
+    print_results(resultFile,final_pop,optimProbConf)
 
     return result
 
@@ -63,6 +66,7 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
 def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTION_KO, criticalReacs=[], isMultiProc=False, candidateSize = None,
                      resultFile=None, initPopFile=None):
     """
+# TODO: include gene
     Function to run the optimization process
     Args:
         simulProblem (StoicSimulationProblem): Simulation problem
@@ -95,25 +99,25 @@ def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTI
         decoder = DecoderReacKnockouts(idsToManipulate)
     elif type == optimType.REACTION_UO:
         if not levels:
-            raise Exception("The specification of levels for under/over optimizarion is required!")
+            raise Exception("The specification of optimization levels is mandatory!")
         decoder = DecoderReacUnderOverExpression(idsToManipulate, levels)
     elif type == optimType.MEDIUM:
         decoder = DecoderMedium(idsToManipulate)
     elif type == optimType.MEDIUM_LEVELS:
         if not levels:
-            raise Exception("The specification of levels for teh optimizarion is required!")
+            raise Exception("The specification of optimization levels is mandatory!")
         decoder = DecoderMediumLevels(idsToManipulate, levels)
     elif type == optimType.MEDIUM_REACTION_KO:
         decoder = DecoderMediumReacKO(drainsToManipulate, reacsToManipulate)
 
     initPopulation = None
     if initPopFile is not None:
-        numGeneration, initPopulation = load_population(initPopFile, decoder)
+        _ , initPopulation = load_population(initPopFile, decoder)
 
     # build optimization configuration problem
     eaConfig = EAConfigurations()
     if candidateSize:
-        eaConfig.MAX_CANDIDATE_SIZE = candidateSize;
+        eaConfig.MAX_CANDIDATE_SIZE = candidateSize
 
     optimProbConf = OptimProblemConfiguration(simulProblem, type=type, decoder=decoder, evaluationFunc=evaluationFunc,
                                               EAConfig=eaConfig)
@@ -168,15 +172,17 @@ def kinetic_strain_optim(simulProblem, objFunc=None, levels=None, type = optimTy
     # load initial population from file
     initPopulation = None
     if initPopFile is not None:
-        numGeneration, initPopulation = load_population(initPopFile, decoder)
+        _, initPopulation = load_population(initPopFile, decoder)
 
     # build optimization configuration problem
     eaConfig = EAConfigurations()
+
     if candidateSize:
-        eaConfig.MAX_CANDIDATE_SIZE = candidateSize;
+        eaConfig.MAX_CANDIDATE_SIZE = candidateSize
 
     optimProbConf = OptimProblemConfiguration(simulProblem, type=type, decoder=decoder, evaluationFunc=objFunc,
                                               EAConfig=eaConfig)
+
 
     # run optimization
     final_pop = run_optimization(optimProbConf, resultFile=resultFile, isMultiProc=isMultiProc,
@@ -238,12 +244,13 @@ def simplifySolutions(optimProbConf, population):
     solutions = []
 
     for ind in population:
+
         overrideProblem = decoder.get_override_simul_problem(ind.candidate, simulProblem)
         fitness = ind.fitness
 
         # do not simplify solutions with fitness == 0 and with a single modification
         if fitness > 0.0 and len(overrideProblem.get_modifications()) > 1:
-            overrideProblem.simplify_modifications(simulProblem, evalFunction, fitness)
+            overrideProblem.simplify_modifications(simulProblem, evalFunction, fitness, ind.candidate)
         solutions.append(simulProblem.simulate(overrideProblem))
     return solutions
 
@@ -262,7 +269,9 @@ def print_results (fileName, population, optimConfig):
     file = open(fileName, 'a')
     file.write("population_size;candidate_max_size;crossover_rate; mutation_rate;new_candidates_rate; num_elites\n")
     file.write(";".join(map(str,optimConfig.get_ea_configurations().get_default_config())))
-    file.write("Generation;Fitness;Candidate;Reactions\n")
+    file.write("\nGeneration;Fitness;Candidate;Reactions\n")
+
+
 
     # save all candidates of the population
     for ind in population:

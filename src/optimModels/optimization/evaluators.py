@@ -1,7 +1,6 @@
 
 import math
 import logging
-import time
 from optimModels.utils.constantes import solverStatus
 from optimModels.utils.utils import MyPool
 
@@ -28,8 +27,12 @@ def evaluator(candidates, args):
     fitness = []
     for candidate in candidates:
         overrideProblem = decoder.get_override_simul_problem(candidate, simulProblem)
+        # TODO:
+        # The fitness value of a candidate with no fitness should be defined elsewhere
+        # CAREFULL ... it doesn't work for minimization problems
 
         fitInd = -1.0
+
         try:
             res = simulProblem.simulate(overrideProblem)
             if res.get_solver_status() == solverStatus.OPTIMAL or res.get_solver_status() == solverStatus.SUBOPTIMAL:
@@ -37,9 +40,10 @@ def evaluator(candidates, args):
                 if math.isnan(fitInd):
                     fitInd = -1.0
         except Exception as error:
-            print ("Oops! Solver problems.  ", error)
+            print ("Oops! Solver problems. ", error)
             logging.getLogger('optimModels').warning( "Oops! Solver problems." + str(error))
         fitness.append(fitInd)
+
     return fitness
 
 
@@ -84,7 +88,6 @@ def parallel_evaluation_mp(candidates, args):
     except KeyError:
         logger.error('parallel_evaluation_mp requires \'mp_nprocs\' be defined in the keyword arguments list.')
         raise
-
     pickled_args = {}
     for key in args:
         try:
@@ -94,20 +97,15 @@ def parallel_evaluation_mp(candidates, args):
             logger.debug('unable to pickle args parameter {0} in parallel_evaluation_mp'.format(key))
             pass
 
-    start = time.time()
     try:
         pool = MyPool(processes=nprocs)
         results = [pool.apply_async(evaluator, ([c], pickled_args)) for c in candidates]
         pool.close()
         pool.join()
-        return [r.get()[0] for r in results]
     except (OSError, RuntimeError) as e:
         logger.error('failed parallel_evaluation_mp: {0}'.format(str(e)))
         raise
     else:
-        end = time.time()
-        print('completed parallel_evaluation_mp in {0} seconds'.format(end - start))
         logger.debug('completed parallel_evaluation_mp in {0} seconds'.format(end - start))
-
-
+        return [r.get()[0] for r in results]
 
