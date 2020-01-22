@@ -47,7 +47,7 @@ class solverMethod:
 
 class solverStatus:
     '''
-     Enumeration of possible solution status. (FROM FRAMED
+     Enumeration of possible solution status. (FROM FRAMED)
     '''
     OPTIMAL = 1
     UNKNOWN = 0
@@ -71,4 +71,3 @@ class solverStatus:
         else:
             str = "Unknown"
         return str
-

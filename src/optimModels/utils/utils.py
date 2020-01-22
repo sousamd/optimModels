@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-import  multiprocessing.pool
+import multiprocessing.pool
 
 def fix_exchange_reactions_model(model):
     '''

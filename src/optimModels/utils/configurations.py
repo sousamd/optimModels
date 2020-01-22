@@ -13,10 +13,11 @@ class StoicConfigurations:
     DEFAULT_UB = 99999
 
 class GeckoConfigurations:
-    SCALE_CONSTANT = 10000
+    SCALE_CONSTANT = 1000000
+    SOLVER_METHOD = 'FBA'
 
 class KineticConfigurations:
-    STEADY_STATE_TIME = 1e9
+    STEADY_STATE_TIME = 1e20
     SOLVER = "odespy"
     SOLVER_METHOD = solverMethod.LSODA  # ode solver method used in the phenotype simulation
     SOLVER_TIMEOUT = 6000  # maximum time allowed by simulation
