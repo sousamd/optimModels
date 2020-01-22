@@ -48,11 +48,13 @@ def toy_model():
 
 
 def toy_model2():
-    SBML_FILE = '../../../examples/models/chassagnole2002.xml'
+    SBML_FILE = '../../../examples/models/C_Mutant_0.xml'
 
     model = load_kinetic_model(SBML_FILE, [])
+
     res = kinetic_simulation(model, time=1e9)
-    print (res.get_fluxes_distribution())
+    res.print()
+    #print (res.get_fluxes_distribution())
 
 
 # Optimization:
@@ -85,5 +87,64 @@ def kinetic_sim():
     for m, c in res.get_steady_state_concentrations().items():
         print(m + " --> " + str(c))
 
+def CoreEcoli():
+    SBML_FILE = '../../../examples/models/CoreEcoli_fixed.xml'
+    map = {}
+    for i in range(1,92):
+        reaction = 'V'+str(i)
+        param = 'vMax_R' + str(i)
+        map[reaction] = [param]
+
+    print(map)
+
+    model = load_kinetic_model(SBML_FILE, map)
+    #params = list(model.get_parameters().keys())[1:-2]
+
+    #alternative_parameters = {}
+
+    #fic = open("../../../examples/models/CoreEcoli_AlternativeParameters.csv", 'r')
+    #lines = fic.readlines()
+    #for i in range(len(params)):
+    #    alternative_parameters[params[i]] = lines[i].strip().split(',')
+
+
+
+
+    #from framed import time_course
+    #T, X = time_course(model, time=100)
+    #print(X)
+
+    from optimModels.simulation.simul_problems import KineticSimulationProblem
+    simulProb = KineticSimulationProblem(model, timeout=None)
+    #print(simulProb.get_time_steps())
+    res = simulProb.simulate()
+    res.print()
+
+def get_reactions_names():
+    model_file = '../../../examples/models/iJO1366.xml'
+    names = '../../../examples/models/reactionIDs.csv'
+
+    model = load_kinetic_model(model_file, {})
+
+    import pandas as pd
+    df = pd.read_csv(names, header=0)
+    ids = df['ReactionName'].tolist()
+    dic = {}
+    for r in model.reactions.values():
+        dic[r.id[2:]] = r.name
+    reaction_names = []
+    for r in ids:
+        if r in dic.keys():
+            name = dic[r]
+        else: name = '---'
+        reaction_names.append(name)
+    new_df = pd.DataFrame({'ids':ids, 'names':reaction_names})
+    new_df.to_csv('reaction_ids_and_names.csv')
+    #print(reaction_names)
+
+
+
 if __name__ == '__main__':
-    toy_model2()
+    CoreEcoli()
+    #get_reactions_names()
+    #toy_model2()
