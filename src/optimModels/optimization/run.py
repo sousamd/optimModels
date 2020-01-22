@@ -7,8 +7,10 @@ from optimModels.utils.configurations import GeckoConfigurations
 
 import itertools
 
-def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROTEIN_KO, criticalProteins=[], isMultiProc=False, candidateSize = None,
-                     resultFile=None, initPopFile=None, eaConfig=EAConfigurations()):
+
+def gecko_strain_optim(simulProblem, evaluationFunc, levels, type = optimType.PROTEIN_KO,
+                       criticalProteins = [], isMultiProc = False, candidateSize = None, resultFile = None,
+                       initPopFile = None, eaConfig = EAConfigurations()):
     """
     Function to run the optimization process.
     Args:
@@ -21,12 +23,15 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
         candidateSize (int):  (by default use the size defined in EAConfigurations.MAX_CANDIDATE_SIZE)
         resultFile (string): File to store the solutions of each generation
         initPopFile (string): File with the initial population
+        eaConfig (EAConfigurations): configurations of the Evolutionary Algorithm
 
     Returns (list): Returns the list of the best modifications.
 
     """
-    idsToManipulate = [x for x in simulProblem.model.proteins if x not in criticalProteins and x not in simulProblem.objective.keys()]
+    idsToManipulate = [x for x in simulProblem.model.proteins if x not in criticalProteins
+                       and x not in simulProblem.objective.keys()]
 
+    decoder = None
     if type == optimType.PROTEIN_KO:
         decoder = DecoderProtKnockouts(list(idsToManipulate))
     elif type == optimType.PROTEIN_UO:
@@ -34,13 +39,12 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
             raise Exception("The specification of levels for under/over optimization is required!")
         decoder = DecoderProtUnderOverExpression(idsToManipulate, levels)
 
-
     initPopulation = None
     if initPopFile is not None:
-        _ , initPopulation = load_population(initPopFile, decoder)
+        _, initPopulation = load_population(initPopFile, decoder)
 
     # build optimization configuration problem
-    #eaConfig = EAConfigurations()
+    # eaConfig = EAConfigurations()
     if candidateSize:
         eaConfig.MAX_CANDIDATE_SIZE = candidateSize
 
@@ -51,20 +55,20 @@ def gecko_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.PROT
     final_pop = run_optimization(optimProbConf, resultFile=resultFile, isMultiProc=isMultiProc,
                                  population=initPopulation)
 
-
-
     best_solutions = findBestSolutions(final_pop, eaConfig)
 
     # simplify solutions
     result = simplifySolutions(optimProbConf, best_solutions)
 
-    print_results(resultFile,final_pop,optimProbConf)
+    print_results(resultFile, final_pop, optimProbConf)
 
     return result
 
 
-def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTION_KO, criticalReacs=[], isMultiProc=False, candidateSize = None,
-                     resultFile=None, initPopFile=None):
+def cbm_strain_optim(simulProblem, evaluationFunc,
+                     levels, type = optimType.REACTION_KO, criticalReacs = [],
+                     isMultiProc = False, candidateSize = None, resultFile = None,
+                     initPopFile = None):
     """
 # TODO: include gene
     Function to run the optimization process
@@ -82,17 +86,20 @@ def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTI
     Returns (list): Returns the list of the best modifications.
 
     """
-
+    idsToManipulate = None
     if type == optimType.MEDIUM or type == optimType.MEDIUM_LEVELS:
-        idsToManipulate = [x for x in simulProblem.get_uptake_reactions() if x not in criticalReacs and x not in simulProblem.objective.keys()]
+        idsToManipulate = [x for x in simulProblem.get_uptake_reactions()
+                           if x not in criticalReacs and x not in simulProblem.objective.keys()]
     elif type == optimType.REACTION_KO or type == optimType.REACTION_UO:
-        idsToManipulate = [x for x in simulProblem.get_internal_reactions() if x not in criticalReacs and x not in simulProblem.objective.keys()]
+        idsToManipulate = [x for x in simulProblem.get_internal_reactions()
+                           if x not in criticalReacs and x not in simulProblem.objective.keys()]
     elif type == optimType.MEDIUM_REACTION_KO:
-        drainsToManipulate = [x for x in simulProblem.get_uptake_reactions() if x not in criticalReacs and x not in simulProblem.objective.keys()]
-        reacsToManipulate = [x for x in simulProblem.get_internal_reactions() if x not in criticalReacs and x not in simulProblem.objective.keys()]
+        drainsToManipulate = [x for x in simulProblem.get_uptake_reactions()
+                              if x not in criticalReacs and x not in simulProblem.objective.keys()]
+        reacsToManipulate = [x for x in simulProblem.get_internal_reactions()
+                             if x not in criticalReacs and x not in simulProblem.objective.keys()]
     else:
         raise Exception("cbm_strain_optim:NOT IMMPLEMENTED!")
-
 
     # build decoder
     if type == optimType.REACTION_KO:
@@ -112,7 +119,7 @@ def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTI
 
     initPopulation = None
     if initPopFile is not None:
-        _ , initPopulation = load_population(initPopFile, decoder)
+        _, initPopulation = load_population(initPopFile, decoder)
 
     # build optimization configuration problem
     eaConfig = EAConfigurations()
@@ -131,37 +138,40 @@ def cbm_strain_optim(simulProblem, evaluationFunc, levels, type=optimType.REACTI
     # simplify solutions
     result = simplifySolutions(optimProbConf, best_solutions)
 
-    print_results(resultFile,final_pop,optimProbConf )
+    print_results(resultFile, final_pop, optimProbConf)
 
     return result
 
 
-def kinetic_strain_optim(simulProblem, objFunc=None, levels=None, type = optimType.REACTION_KO, criticalParameters=[], isMultiProc=False, candidateSize = None, resultFile=None,
-                         initPopFile=None):
+def kinetic_strain_optim(simulProblem, objFunc = None, levels = None,
+                         type = optimType.REACTION_KO, criticalParameters = [],
+                         isMultiProc = False, candidateSize = None, resultFile = None, initPopFile = None):
     """
     Function to run the optimization process
     Args:
         simulProblem (KineticSimulationProblem): Simulation problem
-        evaluationFunc: evaluation function used in EA to calculate the fitness value of each candidate
+        objFunc: evaluation function used in EA to calculate the fitness value of each candidate
         levels (list): List for under/expression of proteins (the levels should be set when type is *_UO
         type: type of optimization ( by default Reaction knockouts)
-        criticalReacs (list): list of reactions that should not be considered in the optimization
+        criticalParameters (list): list of reactions that should not be considered in the optimization
         isMultiProc (bool): use multiprocessing
         candidateSize (int):  (by default use the size defined in EAConfigurations.MAX_CANDIDATE_SIZE)
         resultFile (string): File to store the solutions of each generation
         initPopFile (string): File with the initial population
 
     Returns (list): Returns the list of the best modifications.
-        The function returns the best solutions found in strain optimization. The kineticSimulationResults object has the
+        The function returns the best solutions found in strain optimization.
+        The kineticSimulationResults object has the
         flux distribution and metabolites concentration at steady-state, and the modifications made over the
         original model.
 
     """
 
-    # assumption: the reactionParamsAssociation obj : id_reac--> vMax_paramaeter. The critical Genes are identify by the vMax parameter name
+    # assumption: the reactionParamsAssociation obj : id_reac--> vMax_paramaeter.
+    # The critical Genes are identify by the vMax parameter name
     allParams = list(set(itertools.chain.from_iterable(simulProblem.model.reacParamsFactors.values())))
     idsToManipulate = [x for x in allParams if x not in criticalParameters]
-
+    decoder = None
     if type == optimType.REACTION_KO:
         decoder = DecoderReacKnockouts(idsToManipulate)
     elif type == optimType.REACTION_UO:
@@ -183,7 +193,6 @@ def kinetic_strain_optim(simulProblem, objFunc=None, levels=None, type = optimTy
     optimProbConf = OptimProblemConfiguration(simulProblem, type=type, decoder=decoder, evaluationFunc=objFunc,
                                               EAConfig=eaConfig)
 
-
     # run optimization
     final_pop = run_optimization(optimProbConf, resultFile=resultFile, isMultiProc=isMultiProc,
                                  population=initPopulation)
@@ -193,7 +202,7 @@ def kinetic_strain_optim(simulProblem, objFunc=None, levels=None, type = optimTy
     # simplify solutions
     result = simplifySolutions(optimProbConf, best_solutions)
 
-    print_results(resultFile,final_pop,optimProbConf )
+    print_results(resultFile, final_pop, optimProbConf)
 
     return result
 
@@ -254,7 +263,8 @@ def simplifySolutions(optimProbConf, population):
         solutions.append(simulProblem.simulate(overrideProblem))
     return solutions
 
-def print_results (fileName, population, optimConfig):
+
+def print_results(fileName, population, optimConfig):
     """
    Save the results of a generation in the selected file.
     Args:
@@ -268,13 +278,11 @@ def print_results (fileName, population, optimConfig):
 
     file = open(fileName, 'a')
     file.write("population_size;candidate_max_size;crossover_rate; mutation_rate;new_candidates_rate; num_elites\n")
-    file.write(";".join(map(str,optimConfig.get_ea_configurations().get_default_config())))
+    file.write(";".join(map(str, optimConfig.get_ea_configurations().get_default_config())))
     file.write("\nGeneration;Fitness;Candidate;Reactions\n")
-
-
 
     # save all candidates of the population
     for ind in population:
         solution_decoded = optimConfig.get_decoder().decode_candidate(ind.candidate)
-        file.write(("{0};{1};{2};{3} \n").format("final", ind.fitness, ind.candidate, solution_decoded))
+        file.write("{0};{1};{2};{3} \n".format("final", ind.fitness, ind.candidate, solution_decoded))
     file.close()

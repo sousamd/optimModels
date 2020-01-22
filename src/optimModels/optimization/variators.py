@@ -5,6 +5,8 @@ from inspyred.ec.variators.mutators import mutator
 #####################################################################
 #   Operatores over integer set representation {id1, id2, ... ,id_n}
 #####################################################################
+
+
 @mutator
 def grow_mutation_intSetRep(random, candidate, args):
     """Returns the mutant produced by a grow mutation on the candidate (when the representation is a set of integers).
@@ -57,7 +59,7 @@ def shrink_mutation(random, candidate, args):
     mutRate = args.setdefault("mutation_rate", 0.1)
     if random.random() > mutRate or len(candidate) == 1:
         return candidate
-    index = random.randint(0, len(candidate) - 1) if len(candidate)>1 else 0
+    index = random.randint(0, len(candidate) - 1) if len(candidate) > 1 else 0
     mutantL = list(candidate)
     del mutantL[index]
     mutant = set(mutantL)
@@ -99,12 +101,15 @@ def single_mutation_intSetRep(random, candidate, args):
     mutant = set(mutantL)
     return mutant
 
+
 @crossover
 def uniform_crossover(random, mom, dad, args):
-    """Return the offspring of the uniform crossover on the candidate. Based on two candidates (parents) build 2 children:
+    """Return the offspring of the uniform crossover on the candidate.
+    Based on two candidates (parents) build 2 children:
     - elements present in both parents will be present in both children;
     - both children have at least one element;
-    - elements present in only one parent have equal probability to be present in child 1 or child 2 (after each child has at least one element).
+    - elements present in only one parent have equal probability to be
+    present in child 1 or child 2 (after each child has at least one element).
 
     Args:
         random : the random number generator object
@@ -133,7 +138,7 @@ def uniform_crossover(random, mom, dad, args):
     child2 = copy.copy(intersection)
 
     while len(otherElems) > 0:
-        elemPosition = random.randint(0, len(otherElems) - 1) if len(otherElems)>1 else 0
+        elemPosition = random.randint(0, len(otherElems) - 1) if len(otherElems) > 1 else 0
         if len(child1) == maxSize or len(child2) == 0:
             child2.add(otherElems[elemPosition])
         elif len(child2) == maxSize or len(child1) == 0:
@@ -209,7 +214,7 @@ def single_mutation_intTupleRep(random, candidate, args):
     if random.random() > mutRate:
         return candidate
     mutant = copy.copy(candidate)
-    index = random.randint(0, len(mutant) - 1) if len(mutant)>1 else 0
+    index = random.randint(0, len(mutant) - 1) if len(mutant) > 1 else 0
     mutantL = list(mutant)
     mutantL[index] = _generate_new_tupple(random, mutant, bounder)
     mutant = set(mutantL)
@@ -222,15 +227,17 @@ def _generate_new_tupple(random, mutant, bounder):
     id2 = random.randint(bounder.lower_bound[1], bounder.upper_bound[1])
     while id1 in reacsCandidate:
         id1 = random.randint(bounder.lower_bound[0], bounder.upper_bound[0])
-    return (id1, id2)
+    return id1, id2
 
 
 @crossover
 def uniform_crossover_intTupleRep(random, mom, dad, args):
-    """Return the offspring of the uniform crossover on the candidate. Based on two candidates (parents) build 2 children:
+    """Return the offspring of the uniform crossover on the candidate.
+    Based on two candidates (parents) build 2 children:
     - elements present in both parents will be present in both children;
     - both children have at least one element;
-    - elements present in only one parent have equal probability to be present in child 1 or child 2 (after each child has at least one element).
+    - elements present in only one parent have equal probability to be
+    present in child 1 or child 2 (after each child has at least one element).
 
     Args:
         random : the random number generator object
@@ -258,28 +265,28 @@ def uniform_crossover_intTupleRep(random, mom, dad, args):
     child1 = copy.copy(intersection)
     child2 = copy.copy(intersection)
 
-    #intersection keys
+    # intersection keys
     #############################
-    intkeys = {k for k,v in list(mom)}& {k for k,v in list(dad)}
-    intkeys = intkeys.difference({k for k,v in list(intersection)})
-    swap = bool(random.randint(0,1))
+    intkeys = {k for k, v in list(mom)} & {k for k, v in list(dad)}
+    intkeys = intkeys.difference({k for k, v in list(intersection)})
+    swap = bool(random.randint(0, 1))
     for k in intkeys:
-        v1 = [d2 for d1,d2 in dad if k==d1][0]
-        v2 = [m2 for m1,m2 in mom if k==m1][0]
+        v1 = [d2 for d1, d2 in dad if k == d1][0]
+        v2 = [m2 for m1, m2 in mom if k == m1][0]
         if swap:
             child1.add((k, v2))
             child2.add((k, v1))
         else:
-            child1.add((k,v1))
+            child1.add((k, v1))
             child2.add((k, v2))
         swap = not swap
-        otherElems.remove((k,v1))
-        otherElems.remove((k,v2))
+        otherElems.remove((k, v1))
+        otherElems.remove((k, v2))
     #############################
 
     while len(otherElems) > 0:
         prob = 0.5
-        elemPosition = random.randint(0, len(otherElems) - 1) if len(otherElems)>1 else 0
+        elemPosition = random.randint(0, len(otherElems) - 1) if len(otherElems) > 1 else 0
         if len(child1) >= maxSize or len(child2) == 0:
             prob = 0
         elif len(child2) >= maxSize or len(child1) == 0:
@@ -287,9 +294,9 @@ def uniform_crossover_intTupleRep(random, mom, dad, args):
 
         r = random.random()
         elem = otherElems[elemPosition]
-        if r <= prob and elem[0] not in {k for (k,v) in child1}:
+        if r <= prob and elem[0] not in {k for (k, v) in child1}:
             child1.add(elem)
-        elif elem[0] not in {k for (k,v) in child2}:
+        elif elem[0] not in {k for (k, v) in child2}:
             child2.add(elem)
         else:
             child1.add(elem)
@@ -298,7 +305,6 @@ def uniform_crossover_intTupleRep(random, mom, dad, args):
     children.append(child1)
     children.append(child2)
     return children
-
 
 
 #####################################################################################################
@@ -326,11 +332,11 @@ def grow_mutation_tuple_intSetRep(random, candidate, args):
     mutRate = args.setdefault("mutation_rate", 0.1)
     if random.random() > mutRate:
         return candidate
-    maxSize = args["candidate_max_size"] # tuple with max length for each elem in tuple
+    maxSize = args["candidate_max_size"]  # tuple with max length for each elem in tuple
 
     mutant = copy.copy(candidate)
     r = random.random()
-    index = 0 if r<0.5 else 1 # choose if the mutation is done in the first or second int set.
+    index = 0 if r < 0.5 else 1  # choose if the mutation is done in the first or second int set.
     if len(mutant[index]) < maxSize[index]:
         newElem = random.randint(bounder.lower_bound[index], bounder.upper_bound[index])
         while newElem in mutant[index]:
@@ -360,13 +366,13 @@ def shrink_mutation_tuple(random, candidate, args):
 
     mutant = copy.copy(candidate)
     r = random.random()
-    indexTuple = 0 if r<0.5 else 1 # choose if the mutation is done in the first or second int set.
+    indexTuple = 0 if r < 0.5 else 1  # choose if the mutation is done in the first or second int set.
 
     if random.random() > mutRate or len(candidate[indexTuple]) == 1:
         return candidate
 
     mutantL = list(candidate[indexTuple])
-    index = random.randint(0, len(candidate[indexTuple]) - 1) if len(candidate[indexTuple])>1 else 0
+    index = random.randint(0, len(candidate[indexTuple]) - 1) if len(candidate[indexTuple]) > 1 else 0
     del mutantL[index]
 
     if indexTuple == 0:
@@ -400,9 +406,9 @@ def single_mutation_tuple_intSetRep(random, candidate, args):
         return candidate
     mutant = copy.copy(candidate)
     r = random.random()
-    indexTuple = 0 if r<0.5 else 1 # choose if the mutation is done in the first or second int set.
+    indexTuple = 0 if r < 0.5 else 1  # choose if the mutation is done in the first or second int set.
 
-    index = random.randint(0, len(mutant[indexTuple]) - 1) if len(mutant[indexTuple])>1 else 0
+    index = random.randint(0, len(mutant[indexTuple]) - 1) if len(mutant[indexTuple]) > 1 else 0
     newElem = random.randint(bounder.lower_bound[indexTuple], bounder.upper_bound[indexTuple])
     while newElem in mutant[indexTuple]:
         newElem = random.randint(bounder.lower_bound[indexTuple], bounder.upper_bound[indexTuple])
@@ -415,13 +421,15 @@ def single_mutation_tuple_intSetRep(random, candidate, args):
         mutant = (mutant[0], set(mutantL))
     return mutant
 
+
 @crossover
 def uniform_crossover_tuple(random, mom, dad, args):
-    """Return the offspring of the uniform crossover on the candidate. Based on two candidates (parents) build 2 children:
+    """Return the offspring of the uniform crossover on the candidate.
+    Based on two candidates (parents) build 2 children:
     - elements present in both parents will be present in both children;
     - both children have at least one element;
-    - elements present in only one parent have equal probability to be present in child 1 or child 2 (after each child has at least one element).
-
+    - elements present in only one parent have equal probability to be
+    present in child 1 or child 2 (after each child has at least one element).
 
     Args:
         random : the random number generator object
@@ -447,7 +455,7 @@ def uniform_crossover_tuple(random, mom, dad, args):
 
     maxSize = args["candidate_max_size"][indexTuple]
     r = random.random()
-    indexTuple = 0 if r<0.5 else 1 # choose if the mutation is done in the first or second int set.
+    indexTuple = 0 if r < 0.5 else 1  # choose if the mutation is done in the first or second int set.
 
     p1 = mom[indexTuple]
     p2 = dad[indexTuple]
@@ -472,10 +480,10 @@ def uniform_crossover_tuple(random, mom, dad, args):
 
         otherElems.pop(elemPosition)
 
-    if indexTuple==0:
+    if indexTuple == 0:
         children.append((child1, mom[1]))
         children.append((child2, dad[1]))
     else:
-        children.append((mom[0],child1))
+        children.append((mom[0], child1))
         children.append((dad[0], child2))
     return children

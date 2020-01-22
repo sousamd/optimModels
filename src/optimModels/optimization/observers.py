@@ -12,6 +12,7 @@ def load_population(initPopFile = None, decoder = None):
     """
     population = []
     fitness = []
+    num_generations = 0
     if initPopFile is not None:
         with open(initPopFile, 'r') as file:
             data = file.readlines()
@@ -75,6 +76,5 @@ def save_all_results(population, num_generations, num_evaluations, args):
     # saves the best 5 of the population
     for ind in population:
         solution_decoded = decoder.decode_candidate(ind.candidate)
-        file.write(("{0};{1};{2};{3} \n").format(num_generations, ind.fitness, ind.candidate, solution_decoded))
+        file.write("{0};{1};{2};{3} \n".format(num_generations, ind.fitness, ind.candidate, solution_decoded))
     file.close()
-

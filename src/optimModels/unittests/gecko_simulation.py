@@ -1,6 +1,5 @@
 from geckopy import GeckoModel
 from optimModels.simulation.simul_problems import GeckoSimulationProblem
-
 from optimModels.simulation.override_simul_problem import OverrideStoicSimulProblem
 from optimModels.optimization.evaluation_functions import build_evaluation_function
 from optimModels.optimization.decoders import DecoderProtUnderOverExpression, DecoderProtKnockouts
@@ -8,8 +7,8 @@ import pandas
 import random
 from cobra.io import read_sbml_model
 
-#LEVELS_SARA = [1e-3, 1e-2, 1e-1, 0.5, 1 , 5, 10, 50, 1e2, 5e2, 1e3, 1e4]
-LEVELS = [0, 2 ** -5, 2 ** -4, 2 ** -3, 2 ** -2, 2 ** -1, 2 ** 1, 2 ** 2, 2 ** 3, 2 ** 4, 2 ** 5, 0.1,10]
+# LEVELS_SARA = [1e-3, 1e-2, 1e-1, 0.5, 1 , 5, 10, 50, 1e2, 5e2, 1e3, 1e4]
+LEVELS = [0, 2 ** -5, 2 ** -4, 2 ** -3, 2 ** -2, 2 ** -1, 2 ** 1, 2 ** 2, 2 ** 3, 2 ** 4, 2 ** 5, 0.1, 10]
 
 
 def simulate_prot():
@@ -17,7 +16,7 @@ def simulate_prot():
     model.solver = 'cplex'
 
     with model:
- #       for p in ["P53685","Q01574"]:
+        # for p in ["P53685","Q01574"]:
         for p in ['P33421']:
             r = model.reactions.get_by_id("draw_prot_" + p)
             r.lower_bound = 0
@@ -121,7 +120,8 @@ def simulate_KO(target, KOs=[[]], prot_measure_fractions=None, prot_measure_ggdw
         for prot in candidate:
             if "draw_prot_" + prot in model.reactions:
                 dic["draw_prot_" + prot] = (0, 0)
-            else: dic["prot_" + prot + '_exchange'] = (0, 0)
+            else:
+                dic["prot_" + prot + '_exchange'] = (0, 0)
 
         override = OverrideStoicSimulProblem(dic)
         res = simulProb.simulate(override)
@@ -533,14 +533,14 @@ if __name__ =="__main__":
     #      #'P06169':(0,0)}]
 
 
-   #UO = [{'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4),  'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}]
+   # UO = [{'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4),  'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}]
 
 
-    #UO = [{'P11412': (0, 0), 'P28834': (0, 0.5), 'P41939': (0, 0), 'P21954': (0, 0.1), 'P37298': (0, 0), 'P00890': (0, 10)}]
+    # UO = [{'P11412': (0, 0), 'P28834': (0, 0.5), 'P41939': (0, 0), 'P21954': (0, 0.1), 'P37298': (0, 0), 'P00890': (0, 10)}]
 
     UO = [{'P41939':(0,10)}]
 
-    #print('max biomass')
+    # print('max biomass')
     bio = simulate_UO(target='r_2056', wt_concentrations= [], wt_fluxes=[], UOs=[{}], constraints=const_aero, minBiomassValue=minBiomassValue_aero)#, prot_measure_ggdw=ggdw)
 
     # print('99%')
@@ -573,10 +573,10 @@ if __name__ =="__main__":
     #              minBiomassValue=minBiomassValue_aero, objective={'r_2056': 1}, minimize=True)#, prot_measure_ggdw=ggdw)
 
     # print('UO')
-    #simulate_UO(target='r_2056', wt_concentrations=wt_concentrations, UOs=uo, constraints=const_aero, minBiomassValue=minBiomassValue_aero_multipool, prot_measure_ggdw=ggdw)
-    #print(verify_sol(solution=uo, target='r_2056', constraints=const_aero, KO=False, func='wyield', prot_measure_ggdw=ggdw, minBiomassValue=minBiomassValue_aero_multipool))
+    # simulate_UO(target='r_2056', wt_concentrations=wt_concentrations, UOs=uo, constraints=const_aero, minBiomassValue=minBiomassValue_aero_multipool, prot_measure_ggdw=ggdw)
+    # print(verify_sol(solution=uo, target='r_2056', constraints=const_aero, KO=False, func='wyield', prot_measure_ggdw=ggdw, minBiomassValue=minBiomassValue_aero_multipool))
 
-    #TYR
+    # # TYR
 
     # start = time.time()
     # simulate_KO(target='r_1913', KO=listas, constraints=const)
@@ -584,7 +584,7 @@ if __name__ =="__main__":
     # end = time.time()
     # print(end-start, ' seconds')
 
-    #PHE
+    # # PHE
 
     # start = time.time()
     # simulate_KO(target='r_1903', KO=listas, constraints=const)
@@ -592,7 +592,7 @@ if __name__ =="__main__":
     # print(end-start, ' seconds')
     # verify_sol(candidate=lista, target='r_1903', constraints=const, KO=True, func='TF')
 
-    #NEW MODEL - ECOLI
+    # # NEW MODEL - ECOLI
     # lista = ['P52043', 'P0AC44', 'P0AGE9', 'P0A7E1']
     # dic = {'P00864':(0,10)}
     # const_ecoli = {'EX_glc__D_e_REV': (0, 1)}

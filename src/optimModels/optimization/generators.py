@@ -1,5 +1,5 @@
 
-def  generator_single_int_set(random, args):
+def generator_single_int_set(random, args):
     """
     Function to generate a new individual using the integer set representation.
     The function returns a set of integer values with a maximum of *candidate_max_size* elements.
@@ -14,12 +14,14 @@ def  generator_single_int_set(random, args):
     Notes:
         Required  arguments in args:
         - *candidate_max_size* : number of integer values which compose a individual.
-        - *_ec* : configuration of evolutionary computation. The argument bounder is required to get the maximum value allowed for the individual values.
+        - *_ec* : configuration of evolutionary computation. The argument bounder
+            is required to get the maximum value allowed for the individual values.
     """
     size = random.randint(1, args["candidate_max_size"])
     bounder = args["_ec"].bounder
-    representation = {random.randint(next(bounder.lower_bound), next(bounder.upper_bound)) for i in range(size)}
+    representation = {random.randint(next(bounder.lower_bound), next(bounder.upper_bound)) for _ in range(size)}
     return representation
+
 
 def generator_single_int_tuple(random, args):
     """
@@ -36,19 +38,21 @@ def generator_single_int_tuple(random, args):
     Notes:
         Required  arguments in args:
         - *candidate_max_size* : number of integer values which compose a individual.
-        - *_ec* : configuration of evolutionary computation. The argument bounder is required to get the maximum value allowed for the individual values.
+        - *_ec* : configuration of evolutionary computation. The argument bounder is required to
+            get the maximum value allowed for the individual values.
 
     """
     size = random.randint(1, args["candidate_max_size"])
     # first element of array has the lowers bounds and second element the upper bounds.
     bounder = args["_ec"].bounder
-    tuples={}
+    tuples = {}
     for i in range(size):
         id1 = random.randint(bounder.lower_bound[0], bounder.upper_bound[0])
         id2 = random.randint(bounder.lower_bound[1], bounder.upper_bound[1])
         if id1 not in tuples.keys():
             tuples[id1] = id2
     return {(a, b) for a, b in tuples.items()}
+
 
 def generator_tuple_int_set(random, args):
     """
@@ -67,6 +71,6 @@ def generator_tuple_int_set(random, args):
     size2 = random.randint(1, args["candidate_max_size"][1])
     # first element of array has the lowers bounds and second element the upper bounds.
     bounder = args["_ec"].bounder
-    set1 = {random.randint(bounder.lower_bound[0], bounder.upper_bound[0]) for i in range(size1)}
-    set2 = {random.randint(bounder.lower_bound[1], bounder.upper_bound[1]) for i in range(size2)}
-    return (set1, set2)
+    set1 = {random.randint(bounder.lower_bound[0], bounder.upper_bound[0]) for _ in range(size1)}
+    set2 = {random.randint(bounder.lower_bound[1], bounder.upper_bound[1]) for _ in range(size2)}
+    return set1, set2

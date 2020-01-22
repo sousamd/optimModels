@@ -3,7 +3,6 @@ from itertools import chain
 from optimModels.utils.configurations import StoicConfigurations
 import optimModels.simulation.analysis as an
 from framed.cobra.simulation import FBA, pFBA, MOMA, lMOMA, ROOM
-from framed.solvers import solver_instance
 
 
 class EvaluationFunction:
@@ -73,7 +72,8 @@ class MinCandSizeAndMaxTarget(EvaluationFunction):
 
 
 class MinCandSizeWithLevelsAndMaxTarget(EvaluationFunction):
-    # TODO: Validar o que acontece em caso do ub do target ser 0 ou seja o fluxes[rId] é negativo (ver se há hipotese de isto acontecer)
+    # TODO: Validar o que acontece em caso do ub do target ser 0 ou seja
+    #  o fluxes[rId] é negativo (ver se há hipotese de isto acontecer)
 
     def __init__(self, maxCandidateSize, levels, maxTargetFlux):
         self.maxCandidateSize = maxCandidateSize
@@ -125,7 +125,8 @@ class MinCandSize(EvaluationFunction):
 
     Args:
         maxCandidateSize(int): Maximum size allowed for candidate
-        minFluxes (dict): Minimal value for fluxes to consider fitness different of 0 (key: reaction id, value: minimum of flux).
+        minFluxes (dict): Minimal value for fluxes to consider fitness
+         different of 0 (key: reaction id, value: minimum of flux).
 
     """
 
@@ -158,7 +159,8 @@ class MinCandSize(EvaluationFunction):
 
 class TargetFlux(EvaluationFunction):
     """
-    This class implements the "target flux" objective function. The fitness is given by the flux value of the target reaction.
+    This class implements the "target flux" objective function.
+    The fitness is given by the flux value of the target reaction.
 
     Args:
         targetReactionId (str): Reaction identifier of the target compound production.
@@ -166,7 +168,6 @@ class TargetFlux(EvaluationFunction):
     """
 
     def __init__(self, targetReactionId):
-        # TODO: take only the first element - done
         self.targetReactionId = targetReactionId[0]
 
     def get_fitness(self, simulResult, candidate):
@@ -234,7 +235,8 @@ class BPCY(EvaluationFunction):
         ids = list(ssFluxes.keys())
         if self.biomassId not in ids or self.productId not in ids or self.uptakeId not in ids:
             raise ValueError(
-                "Reaction ids is not present in the fluxes distribution. Please check id objective function is correct.")
+                "Reaction ids is not present in the fluxes distribution. "
+                "Please check id objective function is correct.")
         if abs(ssFluxes[self.uptakeId]) == 0:
             return 0
         else:
@@ -258,7 +260,8 @@ class BPCY(EvaluationFunction):
 
 class BP_MinModifications(EvaluationFunction):
     """
-        This class is based the "Biomass-Product Coupled Yield" objective function but considering the candidate size. The fitness is given by the equation:
+        This class is based the "Biomass-Product Coupled Yield" objective function
+        but considering the candidate size. The fitness is given by the equation:
         (biomass_flux * product_flux)/ candidate_size)
 
         Args:
@@ -276,10 +279,11 @@ class BP_MinModifications(EvaluationFunction):
         ids = list(ssFluxes.keys())
         if self.biomassId not in ids or self.productId not in ids:
             raise ValueError(
-                "Reaction ids is not present in the fluxes distribution. Please check id objective function is correct.")
+                "Reaction ids is not present in the fluxes distribution. "
+                "Please check id objective function is correct.")
         size = len(candidate)
         # optimization of medium and KO .. the candidate is a tuple of lists
-        if (isinstance(candidate[0], list)):
+        if isinstance(candidate[0], list):
             size = len(candidate[0]) + len(candidate[1])
         print(candidate, str(ssFluxes[self.biomassId]), str(ssFluxes[self.productId]))
         return (ssFluxes[self.biomassId] * ssFluxes[self.productId]) / size
@@ -308,7 +312,8 @@ class WYIELD(EvaluationFunction):
             biomassId (str): biomass reaction identifier
             productId (str): target product reaction identifier
     **kwargs options:
-            minBiomassValue (float): minimum biomass value (default None, in which case the minBiomassPercentage is used)
+            minBiomassValue (float): minimum biomass value
+                (default None, in which case the minBiomassPercentage is used)
             minBiomassPercentage (float) : Instead of defining explicitly a minimum biomass value, a percentage of the
                                            wild type biomass is used. Only used when no minBiomassValue is defined
                                            (default minBiomassPercentage:0.10)
@@ -342,7 +347,8 @@ class WYIELD(EvaluationFunction):
         ids = list(ssFluxes.keys())
         if self.biomassId not in ids or self.productId not in ids:
             raise ValueError(
-                "Reaction ids are not present in the fluxes distribution. Please check if the objective function ids are correct.")
+                "Reaction ids are not present in the fluxes distribution. "
+                "Please check if the objective function ids are correct.")
 
         biomassFluxValue = ssFluxes[self.biomassId] * 0.99999
 
@@ -362,14 +368,14 @@ class WYIELD(EvaluationFunction):
         constraints[self.biomassId] = (biomassFluxValue, 100000.0)
 
         # only need to simulate FVA min if alpha is lesser than 1, otherwise it will always be zero
-        if (self.alpha < 1):
+        if self.alpha < 1:
             fvaMinResult = an.FBA(model, objective = {self.productId: 1}, minimize = True, constraints = constraints)
             if fvaMinResult:
                 fvaMinProd = fvaMinResult[self.productId]
                 print('min', fvaMinProd)
 
         # only need to simulate FVA max if alpha is larger than 0, otherwise it will always be zero
-        if (self.alpha > 0):
+        if self.alpha > 0:
             fvaMaxResult = an.FBA(model, objective = {self.productId: 1}, constraints = constraints)
             if fvaMaxResult:
                 fvaMaxProd = fvaMaxResult[self.productId]
@@ -404,7 +410,8 @@ def build_evaluation_function(id, *args, **kwargs):
     Function to return an evaluation function instance.
 
     Args:
-        id (str): Name of the objective function. The implemented objective functions should be registed in constants.objFunctions class
+        id (str): Name of the objective function. The implemented objective
+            functions should be registed in constants.objFunctions class
         *args (list of str): The number of arguments depends of the objective function chosen by user.
         **kwargs dictionary of additional optional arguments
     Returns:
@@ -429,4 +436,3 @@ def build_evaluation_function(id, *args, **kwargs):
         raise Exception("Wrong objective function!")
 
     return objFunc
-

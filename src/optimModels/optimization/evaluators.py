@@ -1,4 +1,4 @@
-
+import time
 import math
 import logging
 from optimModels.utils.constantes import solverStatus
@@ -8,6 +8,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+
 
 def evaluator(candidates, args):
     """
@@ -40,8 +41,8 @@ def evaluator(candidates, args):
                 if math.isnan(fitInd):
                     fitInd = -1.0
         except Exception as error:
-            print ("Oops! Solver problems. ", error)
-            logging.getLogger('optimModels').warning( "Oops! Solver problems." + str(error))
+            print("Oops! Solver problems. ", error)
+            logging.getLogger('optimModels').warning("Oops! Solver problems." + str(error))
         fitness.append(fitInd)
 
     return fitness
@@ -98,14 +99,15 @@ def parallel_evaluation_mp(candidates, args):
             pass
 
     try:
+        start = time.time()
         pool = MyPool(processes=nprocs)
         results = [pool.apply_async(evaluator, ([c], pickled_args)) for c in candidates]
         pool.close()
         pool.join()
+        end = time.time()
     except (OSError, RuntimeError) as e:
         logger.error('failed parallel_evaluation_mp: {0}'.format(str(e)))
         raise
     else:
         logger.debug('completed parallel_evaluation_mp in {0} seconds'.format(end - start))
         return [r.get()[0] for r in results]
-

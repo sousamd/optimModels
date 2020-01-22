@@ -68,15 +68,16 @@ def new_candidates_no_duplicates_replacement(random, population, parents, offspr
     # remove duplicates
     newPopulation = []
     for elem in population:
-        if  not _candidateInPopulation(elem.candidate , newPopulation):
+        if not _candidateInPopulation(elem.candidate, newPopulation):
             newPopulation.append(elem)
 
-    #complete the population size with new elements
+    # complete the population size with new elements
     numNewCandidates = len(population) - len(newPopulation)
     newCandidates = _generateNewCandidates(numNewCandidates, random, args)
     newPopulation = newPopulation + newCandidates
 
     return newPopulation
+
 
 def _generateNewCandidates(numCandidates, random, args):
     newCandidates = []
@@ -88,7 +89,7 @@ def _generateNewCandidates(numCandidates, random, args):
 
         evaluator = args["_ec"].evaluator
 
-        newElems = [generator(random=random, args=args) for i in range(numCandidates)]
+        newElems = [generator(random=random, args=args) for _ in range(numCandidates)]
         newFits = evaluator(candidates=newElems, args=args)
 
         for cs, fit in zip(newElems, newFits):
