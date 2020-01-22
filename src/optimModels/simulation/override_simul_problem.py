@@ -29,7 +29,7 @@ class OverrideStoicSimulProblem(OverrideSimulationProblem):
         return self.constraints
 
 
-    def simplify_modifications(self, simulationProblem, objFunction, fitness):
+    def simplify_modifications(self, simulationProblem, objFunction, fitness, candidate):
         """
         Simplify the constraints to be applied in the simulation. Constraints that not influence the fitness value will
         be removed.
@@ -45,12 +45,11 @@ class OverrideStoicSimulProblem(OverrideSimulationProblem):
             del self.constraints[k]
             try:
                 res = simulationProblem.simulate(self)
-                newFitness = objFunction.get_fitness(res)
+                newFitness = objFunction.get_fitness(res, candidate=candidate)
             except Exception:
                 newFitness = -1.0
             if round(fitness, 12) != round(newFitness, 12):
                 self.constraints[k] = constraintsOrig[k]
-
 
 class OverrideKineticSimulProblem(OverrideSimulationProblem):
     """

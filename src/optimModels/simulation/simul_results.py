@@ -1,22 +1,24 @@
 from optimModels.utils.constantes import solverStatus
 
+
 class SimulationResult():
     """
     Represents the result of a metabolic model simulation at steady-state.
     """
 
-    def __init__(self, modelId, solverStatus, ssFluxesDistrib,
-                 overrideSimulProblem=None):
+    def __init__(self, model, solverStatus, ssFluxesDistrib,
+                 overrideSimulProblem = None):
         """
         Create a Simulationresult instance.
 
         Args:
             modelId (str): Identification of metabolic model
+            model: The model
             solverStatus (int): Simulation result (OPTIMAL = 0, UNKNOWN = 1, ERROR = 2).
             ssFluxesDistrib (dict): Fluxes distribution achieved in steady state.
             overrideSimulProblem (OverrideSimulProblem): Modifications over the metabolic model.
         """
-        self.modelId = modelId
+        self.model = model
         self.solverStatus = solverStatus
         self.ssFluxesDistrib = ssFluxesDistrib
         self.overrideSimulProblem = overrideSimulProblem
@@ -39,6 +41,13 @@ class SimulationResult():
         """
         return self.ssFluxesDistrib
 
+    def get_model(self):
+        """
+        gets the steady-state model
+        """
+        return self.model
+
+
 class StoicSimulationResult(SimulationResult):
 
     def __getstate__(self):
@@ -51,7 +60,7 @@ class StoicSimulationResult(SimulationResult):
     def print(self):
         print("Phenotype Simulation")
         print("------------------------")
-        print("model id: " + self.modelId)
+        print("model id: " + self.model.id)
         print("status: " + solverStatus.get_status_str(self.solverStatus))
         print("fluxes: ")
         for k, v in self.ssFluxesDistrib.items():
@@ -63,13 +72,65 @@ class StoicSimulationResult(SimulationResult):
                 print("     " + k + " = " + str(v))
         print("------------------------")
 
+    # TODO: test
+    def get_net_conversion(self, biomassId = None):
+        '''
+           Returs a string representation of the net conversion
+
+           args:
+                biosmassId (str) : optional
+        '''
+
+        ssFluxes = self.get_fluxes_distribution()
+
+        left = ""
+        right = ""
+
+        # just for pretty print
+        firstLeft, firstRight = True, True
+
+        reactions = self.model.reactions
+        for r_id in reactions.keys():
+            fluxValue = ssFluxes[r_id]
+            sub = reactions[r_id].get_substrates()
+            prod = reactions[r_id].get_products()
+            # if rId is a drain reaction
+            if fluxValue != 0.0 and (len(sub) == 0 or len(prod) == 0):
+                m = sub + prod
+                if fluxValue < 0:
+                    if firstLeft:
+                        firstLeft = False
+                    else:
+                        left = left + " + "
+                    left = left + str(-1 * fluxValue)
+                    left = left + " " + m[0]
+                else:
+                    if firstRight:
+                        firstRight = False
+                    else:
+                        right = right + " + "
+                    right = right + str(fluxValue)
+                    right = right + " " + m[0]
+
+        if biomassId and biomassId in ssFluxes.keys():
+            biomassFlux = ssFluxes[biomassId]
+            if biomassFlux > 0:
+                if firstRight:
+                    firstRight = False
+                else:
+                    right = right + " + "
+                right = right + str(biomassFlux)
+                right = right + " " + biomassId
+
+        return left + " --> " + right
+
+
 class GeckoSimulationResult(SimulationResult):
 
-    def __init__(self, modelId, solverStatus, ssFluxesDistrib=None, protConcentrations=None,
-                 overrideSimulProblem=None):
-        super().__init__(modelId, solverStatus, ssFluxesDistrib, overrideSimulProblem)
+    def __init__(self, model, solverStatus, ssFluxesDistrib = None, protConcentrations = None,
+                 overrideSimulProblem = None):
+        super().__init__(model, solverStatus, ssFluxesDistrib, overrideSimulProblem)
         self.protConcentrations = protConcentrations
-
 
     def get_protein_concentrations(self):
         """
@@ -84,14 +145,13 @@ class GeckoSimulationResult(SimulationResult):
     def __setstate__(self, state):
         self.__dict__.update(state)
 
-
     def print(self):
         print("Phenotype Simulation")
         print("------------------------")
-        print("model id: " + self.modelId)
+        print("model id: " + self.model.id)
         print("status: " + solverStatus.get_status_str(self.solverStatus))
         print("fluxes: ")
-        for k,v in self.ssFluxesDistrib.items():
+        for k, v in self.ssFluxesDistrib.items():
             print("     " + k + " = " + str(v))
 
         print("protein concentrations: ")
@@ -100,11 +160,9 @@ class GeckoSimulationResult(SimulationResult):
 
         if self.overrideSimulProblem:
             print("mofifications:")
-            for k,v in self.overrideSimulProblem.get_modifications().items():
+            for k, v in self.overrideSimulProblem.get_modifications().items():
                 print("     " + k + " = " + str(v))
         print("------------------------")
-
-
 
 
 class kineticSimulationResult(SimulationResult):
@@ -118,19 +176,16 @@ class kineticSimulationResult(SimulationResult):
         overrideSimulProblem (overrideKineticSimulProblem): modifications over the metabolic model.
     """
 
-    def __init__(self, modelId, solverStatus, ssFluxesDistrib, ssConcentrations=None,
-                 overrideSimulProblem=None):
+    def __init__(self, model, solverStatus, ssFluxesDistrib, ssConcentrations = None,
+                 overrideSimulProblem = None):
         self.ssConcentrations = ssConcentrations
-        super().__init__(modelId, solverStatus,ssFluxesDistrib, overrideSimulProblem)
-
+        super().__init__(model, solverStatus, ssFluxesDistrib, overrideSimulProblem)
 
     def get_steady_state_concentrations(self):
         """
         Gets the metabolite concentrations in steady-state {metaboliteId: concentration value}.
         """
         return self.ssConcentrations
-
-
 
     def __getstate__(self):
         state = self.__dict__.copy()
@@ -139,14 +194,13 @@ class kineticSimulationResult(SimulationResult):
     def __setstate__(self, state):
         self.__dict__.update(state)
 
-
     def print(self):
         print("Phenotype Simulation")
         print("------------------------")
-        print("model id: " + self.modelId)
+        print("model id: " + self.model.id)
         print("status: " + solverStatus.get_status_str(self.solverStatus))
         print("fluxes: ")
-        for k,v in self.ssFluxesDistrib.items():
+        for k, v in self.ssFluxesDistrib.items():
             print("     " + k + " = " + str(v))
 
         print("concentrations: ")
@@ -155,6 +209,6 @@ class kineticSimulationResult(SimulationResult):
 
         if self.overrideSimulProblem:
             print("mofifications:")
-            for k,v in self.overrideSimulProblem.get_modifications().items():
+            for k, v in self.overrideSimulProblem.get_modifications().items():
                 print("     " + k + " = " + str(v))
         print("------------------------")
