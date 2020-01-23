@@ -72,59 +72,6 @@ class StoicSimulationResult(SimulationResult):
                 print("     " + k + " = " + str(v))
         print("------------------------")
 
-    # TODO: test
-    def get_net_conversion(self, biomassId = None):
-        """
-           Returs a string representation of the net conversion
-
-           args:
-                biosmassId (str) : optional
-        """
-
-        ssFluxes = self.get_fluxes_distribution()
-
-        left = ""
-        right = ""
-
-        # just for pretty print
-        firstLeft, firstRight = True, True
-
-        reactions = self.model.reactions
-        for r_id in reactions.keys():
-            fluxValue = ssFluxes[r_id]
-            sub = reactions[r_id].get_substrates()
-            prod = reactions[r_id].get_products()
-            # if rId is a drain reaction
-            if fluxValue != 0.0 and (len(sub) == 0 or len(prod) == 0):
-                m = sub + prod
-                if fluxValue < 0:
-                    if firstLeft:
-                        firstLeft = False
-                    else:
-                        left = left + " + "
-                    left = left + str(-1 * fluxValue)
-                    left = left + " " + m[0]
-                else:
-                    if firstRight:
-                        firstRight = False
-                    else:
-                        right = right + " + "
-                    right = right + str(fluxValue)
-                    right = right + " " + m[0]
-
-        if biomassId and biomassId in ssFluxes.keys():
-            biomassFlux = ssFluxes[biomassId]
-            if biomassFlux > 0:
-                if firstRight:
-                    # firstRight = False
-                    pass
-                else:
-                    right = right + " + "
-                right = right + str(biomassFlux)
-                right = right + " " + biomassId
-
-        return left + " --> " + right
-
 
 class GeckoSimulationResult(SimulationResult):
 

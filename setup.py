@@ -8,7 +8,7 @@ setup(
     install_requires = [
         'odespy',
         'inspyred',
-        'framed', 'geckopy', 'cobra', 'optlang'],
+        'framed', 'geckopy', 'cobra', 'optlang', 'pandas', 'numpy'],
     author = 'Sara Correia',
     author_email = 'sarag.correia@gmail.com',
     description = 'optimModels - strain optimization',

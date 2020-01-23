@@ -3,16 +3,17 @@ import pandas as pd
 import numpy as np
 np.set_printoptions(threshold=sys.maxsize)
 np.set_printoptions(suppress=True)
-import matplotlib.pyplot as plt
 pd.options.display.width = 0
 pd.set_option('display.max_rows', None)
 
-def sol_str_to_list (str_sol):
+
+def sol_str_to_list(str_sol):
     str_sol = str_sol.rstrip()
     str_sol = str_sol[1:-1].split(sep = ', ')
     str_sol = [x[1:-1] for x in str_sol]
     list_sol = str_sol
     return list_sol
+
 
 def save_to_csv(csv_address, line, header = False):
     file = open(csv_address, "a+")
@@ -21,6 +22,7 @@ def save_to_csv(csv_address, line, header = False):
     else:
         file.write("\n"+line)
     file.close()
+
 
 # Upload data
 results_dir = "C:Users/theze/Documentos/Work/CEB_Fellowship/Work/Results/Succ_Optim/Yeast_Succ/"
@@ -57,7 +59,9 @@ for protein in sol_counting:
     name = record.description
     print("{}: {} - {}".format(protein[1], protein[0], name))
 
-cytochromes = ["P00128", "P07256", "P08067", "P07257", "P37299", "P00127", "P07143", "P00163", "P08525", "P22289", "P37298", "P33421", "P32799 ", "P53239", "P00045", "P00175", "Q01519", "P04037", "P19516", "Q3E731", "Q04935", "P54781", "P38824", "P47081"]
+cytochromes = ["P00128", "P07256", "P08067", "P07257", "P37299", "P00127", "P07143", "P00163",
+               "P08525", "P22289", "P37298", "P33421", "P32799 ", "P53239", "P00045", "P00175",
+               "Q01519", "P04037", "P19516", "Q3E731", "Q04935", "P54781", "P38824", "P47081"]
 glycine_cleavage_complex = ["P49095", "P48015", "P39726"]
 proteins_to_exclude = cytochromes + glycine_cleavage_complex
 

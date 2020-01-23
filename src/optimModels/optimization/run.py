@@ -4,7 +4,6 @@ from optimModels.optimization.evolutionary_computation import run_optimization, 
     EAConfigurations
 from optimModels.utils.constantes import optimType
 from optimModels.utils.configurations import GeckoConfigurations
-
 import itertools
 
 
@@ -69,8 +68,8 @@ def cbm_strain_optim(simulProblem, evaluationFunc,
                      levels, type = optimType.REACTION_KO, criticalReacs = [],
                      isMultiProc = False, candidateSize = None, resultFile = None,
                      initPopFile = None):
+    # TODO: include gene
     """
-# TODO: include gene
     Function to run the optimization process
     Args:
         simulProblem (StoicSimulationProblem): Simulation problem

@@ -1,9 +1,8 @@
 from geckopy import GeckoModel
 from optimModels.simulation.simul_problems import GeckoSimulationProblem
-
 from optimModels.simulation.override_simul_problem import OverrideStoicSimulProblem
 from optimModels.optimization.evaluation_functions import build_evaluation_function
-from optimModels.optimization.decoders import DecoderProtUnderOverExpression, DecoderProtKnockouts
+from optimModels.optimization.decoders import DecoderProtUnderOverExpression
 import pandas
 import random
 from cobra.io import read_sbml_model
@@ -44,8 +43,6 @@ def simulate_wt(solver_name):
     with model:
         r = model.reactions.get_by_id("draw_prot_" + p)
 
-        lb = r.lower_bound
-        ub = r.upper_bound
         r.lower_bound = 0
         r.upper_bound = 0.000001
         res = model.optimize()
@@ -58,8 +55,6 @@ def simulate_wt(solver_name):
 
 
 def simulate_wt_multi():
-    model = GeckoModel('multi-pool')
-    import pandas
     some_measurements = pandas.Series({'P00549': 0.1, 'P31373': 0.1, 'P31382': 0.1})
     model = GeckoModel('multi-pool')
     model.limit_proteins(some_measurements)
@@ -93,8 +88,6 @@ def analysis_growth(resFileName):
 
 
 def analysis_ko(resFileName):
-    levels = [0, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 0.1]
-
     model = GeckoModel('single-pool')
     df = pandas.DataFrame(index = range(100), columns = ["ko", "Biomass"])
 
@@ -380,8 +373,46 @@ if __name__ == "__main__":
     #
     # print(essenciais)
     #
-    # proteins1 = ['P0A725', 'P0A9L8', 'P0AC75', 'P0ACB2', 'P21156', 'P38038', 'P17846', 'P0A786', 'P0A9D8', 'P00861', 'P07004', 'P00934', 'P0AAI9', 'P08244', 'P0A8K1', 'P0AEA8', 'P07623', 'P61714', 'P30126', 'P27300', 'P23908', 'P0AB89', 'P23845', 'P0AGK1', 'P0A6C5', 'P0ACB4', 'P60757', 'P0AF98', 'P0AEZ1', 'P10371', 'P0ADC6', 'P0A6A6', 'P0ABD5', 'P0A6L2', 'P45578', 'P06989', 'P60546', 'P0ACC7', 'P05194', 'P05791', 'P04036', 'P0AC13', 'P11458', 'P00547', 'P0ABD8', 'P22634', 'P0A9D4', 'P0A6C8', 'P06988', 'P0A6E4', 'P15770', 'P08200', 'P0AG40', 'P62615', 'P23830', 'P0A7D4', 'P0AD68', 'P0A7E3', 'P0A6I9', 'P0AEK2', 'P22255', 'P0A7I7', 'P62617', 'P26281', 'P0ADC1', 'P23893', 'P08373', 'P11447', 'P19624', 'P04079', 'P0ADV9', 'P0A6I6', 'P29680', 'P0A9V1', 'P31057', 'P0A6I3', 'P09029', 'P0A9Q5', 'P00909', 'P05020', 'P0A6A8', 'P11880', 'P0A9Q9', 'P04951', 'P0A6J1', 'P17854', 'P0A790', 'P24182', 'P0AED7', 'P17169', 'P0ABZ4', 'P0AD65', 'P17952', 'P09151', 'P43341', 'P0AB80', 'P08192', 'P25539', 'P22939', 'P07639', 'P0ABG4', 'P0A749', 'P0AF12', 'P05793', 'P31663', 'P60752', 'P0AGG0', 'P11446', 'P00904', 'P0A7B3', 'P77488', 'P00903', 'P17443', 'Q46893', 'P60664', 'P0A9J8', 'P0A7B5', 'P0A884', 'P62620', 'P07023', 'P06983', 'P0A6T5', 'P0A794', 'P60595', 'P0AF16', 'P0A7J0', 'P05041', 'P06986', 'P12008', 'P0A6K1', 'P00935', 'P0A879', 'P31120', 'P0A6X1', 'P0A715', 'P0A6D3', 'P60472', 'P10441', 'P30011', 'P0A752', 'P0ABG1', 'P0ABQ0', 'P0A7E5', 'P22188', 'P0A6W3', 'P31554', 'P62623', 'P04805', 'P21645', 'P10902', 'P14900', 'P0AFU8', 'P26647', 'P0ADV1', 'P0A722', 'P0A877', 'P0A817', 'P45568', 'P06987', 'P18843', 'P0A720', 'P00895', 'P0AD57']
-    # proteins2 = ['P00934', 'P0ABZ4', 'P17846', 'P0ACB2', 'P0A8K1', 'P0AEK2', 'P0AGK1', 'P0A7E5', 'P25539', 'P0ADV1', 'P0A817', 'P0A7J0', 'P0A9Q9', 'P0ADC6', 'P11880', 'P17443', 'P0A9Q5', 'P0A749', 'P21156', 'P0AF12', 'P0A6I6', 'Q46893', 'P30011', 'P04079', 'P0A794', 'P08373', 'P60595', 'P04951', 'P0AB89', 'P0A6E4', 'P21645', 'P0A6L2', 'P0A752', 'P60752', 'P0AEZ1', 'P0A720', 'P31663', 'P0AC75', 'P0A6C5', 'P04036', 'P05020', 'P23908', 'P0ACC7', 'P06988', 'P06983', 'P45568', 'P09151', 'P0A6X1', 'P0AAI9', 'P14900', 'P0A7I7', 'P0A6T5', 'P0AF16', 'P0AFU8', 'P06986', 'P24182', 'P0ABH7', 'P00547', 'P0AD68', 'P0A6J1', 'P17952', 'P0A6A6', 'P0ABQ0', 'P22634', 'P0A6I3', 'P00935', 'P22188', 'P23830', 'P0A6K1', 'P38038', 'P60664', 'P11458', 'P0A6A8', 'P0ABG1', 'P00904', 'P07023', 'P0A790', 'P07639', 'P11447', 'P0AC13', 'P0A722', 'P0AG40', 'P08244', 'P0A879', 'P0A9J8', 'P0ADC1', 'P0A6C8', 'P23893', 'P26647', 'P18843', 'P17169', 'P0ADV9', 'P07623', 'P00903', 'P77488', 'P30126', 'P00909', 'P17854', 'P61714', 'P62620', 'P0A715', 'P0AD65', 'P09126', 'P11446', 'P08192', 'P31120', 'P26281', 'P29680', 'P12008', 'P60757', 'P0AED7', 'P60472', 'P0A6W3', 'P05793', 'P0ABG4', 'P06987', 'P0A786', 'P0A7B5', 'P0ABD5', 'P43341', 'P31554', 'P0A877', 'P0A6D3', 'P05791', 'P05041', 'P62623', 'P45578', 'P22939', 'P19624', 'P04805', 'P23845', 'P60546', 'P05194', 'P0A725', 'P0A9V1', 'P0AEA8', 'P10441', 'P0ABD8', 'P62615', 'P0AD57', 'P10902', 'P00861', 'P0AF98', 'P31057', 'P0AB80', 'P0A7E3', 'P0AGG0', 'P07004', 'P0A6I9', 'P0AC16', 'P0A884', 'P0A7B3', 'P00895', 'P62617', 'P0ACB4', 'P06989', 'P27300', 'P10371', 'P15770', 'P0A9L8', 'P08200', 'P0A9D8', 'P0A9D4']
+    proteins1 = ['P0A725', 'P0A9L8', 'P0AC75', 'P0ACB2', 'P21156', 'P38038', 'P17846',
+                 'P0A786', 'P0A9D8', 'P00861', 'P07004', 'P00934', 'P0AAI9', 'P08244', 'P0A8K1',
+                 'P0AEA8', 'P07623', 'P61714', 'P30126', 'P27300', 'P23908', 'P0AB89', 'P23845',
+                 'P0AGK1', 'P0A6C5', 'P0ACB4', 'P60757', 'P0AF98', 'P0AEZ1', 'P10371', 'P0ADC6',
+                 'P0A6A6', 'P0ABD5', 'P0A6L2', 'P45578', 'P06989', 'P60546', 'P0ACC7', 'P05194',
+                 'P05791', 'P04036', 'P0AC13', 'P11458', 'P00547', 'P0ABD8', 'P22634', 'P0A9D4',
+                 'P0A6C8', 'P06988', 'P0A6E4', 'P15770', 'P08200', 'P0AG40', 'P62615', 'P23830',
+                 'P0A7D4', 'P0AD68', 'P0A7E3', 'P0A6I9', 'P0AEK2', 'P22255', 'P0A7I7', 'P62617',
+                 'P26281', 'P0ADC1', 'P23893', 'P08373', 'P11447', 'P19624', 'P04079', 'P0ADV9',
+                 'P0A6I6', 'P29680', 'P0A9V1', 'P31057', 'P0A6I3', 'P09029', 'P0A9Q5', 'P00909',
+                 'P05020', 'P0A6A8', 'P11880', 'P0A9Q9', 'P04951', 'P0A6J1', 'P17854', 'P0A790',
+                 'P24182', 'P0AED7', 'P17169', 'P0ABZ4', 'P0AD65', 'P17952', 'P09151', 'P43341',
+                 'P0AB80', 'P08192', 'P25539', 'P22939', 'P07639', 'P0ABG4', 'P0A749', 'P0AF12',
+                 'P05793', 'P31663', 'P60752', 'P0AGG0', 'P11446', 'P00904', 'P0A7B3', 'P77488',
+                 'P00903', 'P17443', 'Q46893', 'P60664', 'P0A9J8', 'P0A7B5', 'P0A884', 'P62620',
+                 'P07023', 'P06983', 'P0A6T5', 'P0A794', 'P60595', 'P0AF16', 'P0A7J0', 'P05041',
+                 'P06986', 'P12008', 'P0A6K1', 'P00935', 'P0A879', 'P31120', 'P0A6X1', 'P0A715',
+                 'P0A6D3', 'P60472', 'P10441', 'P30011', 'P0A752', 'P0ABG1', 'P0ABQ0', 'P0A7E5',
+                 'P22188', 'P0A6W3', 'P31554', 'P62623', 'P04805', 'P21645', 'P10902', 'P14900',
+                 'P0AFU8', 'P26647', 'P0ADV1', 'P0A722', 'P0A877', 'P0A817', 'P45568', 'P06987',
+                 'P18843', 'P0A720', 'P00895', 'P0AD57']
+    proteins2 = ['P00934', 'P0ABZ4', 'P17846', 'P0ACB2', 'P0A8K1', 'P0AEK2', 'P0AGK1', 'P0A7E5',
+                 'P25539', 'P0ADV1', 'P0A817', 'P0A7J0', 'P0A9Q9', 'P0ADC6', 'P11880', 'P17443', 'P0A9Q5',
+                 'P0A749', 'P21156', 'P0AF12', 'P0A6I6', 'Q46893', 'P30011', 'P04079', 'P0A794', 'P08373',
+                 'P60595', 'P04951', 'P0AB89', 'P0A6E4', 'P21645', 'P0A6L2', 'P0A752', 'P60752', 'P0AEZ1',
+                 'P0A720', 'P31663', 'P0AC75', 'P0A6C5', 'P04036', 'P05020', 'P23908', 'P0ACC7', 'P06988',
+                 'P06983', 'P45568', 'P09151', 'P0A6X1', 'P0AAI9', 'P14900', 'P0A7I7', 'P0A6T5', 'P0AF16',
+                 'P0AFU8', 'P06986', 'P24182', 'P0ABH7', 'P00547', 'P0AD68', 'P0A6J1', 'P17952', 'P0A6A6',
+                 'P0ABQ0', 'P22634', 'P0A6I3', 'P00935', 'P22188', 'P23830', 'P0A6K1', 'P38038', 'P60664',
+                 'P11458', 'P0A6A8', 'P0ABG1', 'P00904', 'P07023', 'P0A790', 'P07639', 'P11447', 'P0AC13',
+                 'P0A722', 'P0AG40', 'P08244', 'P0A879', 'P0A9J8', 'P0ADC1', 'P0A6C8', 'P23893', 'P26647',
+                 'P18843', 'P17169', 'P0ADV9', 'P07623', 'P00903', 'P77488', 'P30126', 'P00909', 'P17854',
+                 'P61714', 'P62620', 'P0A715', 'P0AD65', 'P09126', 'P11446', 'P08192', 'P31120', 'P26281',
+                 'P29680', 'P12008', 'P60757', 'P0AED7', 'P60472', 'P0A6W3', 'P05793', 'P0ABG4', 'P06987',
+                 'P0A786', 'P0A7B5', 'P0ABD5', 'P43341', 'P31554', 'P0A877', 'P0A6D3', 'P05791', 'P05041',
+                 'P62623', 'P45578', 'P22939', 'P19624', 'P04805', 'P23845', 'P60546', 'P05194', 'P0A725',
+                 'P0A9V1', 'P0AEA8', 'P10441', 'P0ABD8', 'P62615', 'P0AD57', 'P10902', 'P00861', 'P0AF98',
+                 'P31057', 'P0AB80', 'P0A7E3', 'P0AGG0', 'P07004', 'P0A6I9', 'P0AC16', 'P0A884', 'P0A7B3',
+                 'P00895', 'P62617', 'P0ACB4', 'P06989', 'P27300', 'P10371', 'P15770', 'P0A9L8', 'P08200', 'P0A9D8',
+                 'P0A9D4']
     #
     # print([x for x in proteins1 if x in proteins2])
 
@@ -402,7 +433,7 @@ if __name__ == "__main__":
     # min_biom = 0.03112  # aero
     # # min_biom = 0.00518  # anaero
 
-    KO = []  # ["P33330", "P07256", "P11412", "Q12680", "P14065", "P54115", "P41939"]
+    KO = ['P42941', 'P54115', 'P37299', 'P37303', 'P46969', 'Q12680', 'P14065']
     UO = {'P60752': (0, 2), 'P00864': (0, 32), 'P0ABB4': (0, 32), 'P0AD65': (0, 0.25), 'P46022': (0, 32),
           'P16701': (0, 0.5), 'P0ABG1': (0, 8), 'P06983': (0, 32), 'P05042': (0, 0.25), 'P0ABP8': (0, 0.0625)}
 
@@ -412,8 +443,3 @@ if __name__ == "__main__":
     fluxes, model = simulate_KO(model_sp = "Yeast", KO = KO, constraints = const_aero, minbiom = min_biom,
                                 save = saveflag)
     # simulate_UO(model_sp = "Ecoli", UO = UO, constraints = const_aero, minbiom = min_biom, save = saveflag)
-
-    for protein in model.proteins:
-        reaction = model.reactions.get_by_id("draw_prot_" + protein)
-        met = list(reaction.metabolites.keys())[1]
-        print(met)

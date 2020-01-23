@@ -28,9 +28,8 @@ def evaluator(candidates, args):
     fitness = []
     for candidate in candidates:
         overrideProblem = decoder.get_override_simul_problem(candidate, simulProblem)
-        # TODO:
-        # The fitness value of a candidate with no fitness should be defined elsewhere
-        # CAREFULL ... it doesn't work for minimization problems
+        # TODO: The fitness value of a candidate with no fitness should be defined elsewhere
+        #  CAREFULL ... it doesn't work for minimization problems
 
         fitInd = -1.0
 

@@ -354,7 +354,7 @@ class WYIELD(EvaluationFunction):
 
         constraints = simulResult.get_override_simul_problem().get_modifications()
 
-        # todo: necessario calcular isto de novo? ASK
+        # todo: necessario calcular isto de novo? ASK candidato vs wild type
         if self.minBiomassValue is None or self.minBiomassValue < 0.0:
             solution = an.FBA(model, objective = {self.biomassId: 1}, constraints = constraints)
             wtBiomassValue = solution[self.biomassId]
