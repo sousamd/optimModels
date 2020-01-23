@@ -43,7 +43,7 @@ def evaluator(candidates, args):
     fitness = []
     # start_time = time.time()
     for candidate in candidates:
-        #print(candidate)
+        # print(candidate)
         overrideProblem = decoder.get_override_simul_problem(candidate, simulProblem)
 
         fitInd = -1.0
@@ -131,7 +131,6 @@ def parallel_evaluation_mp(candidates, args):
         return [r.get()[0] for r in results]
 
 
-
 model = GeckoModel('single-pool')
 const = {'r_1714_REV': (0, 1)}
 simulProblem = GeckoSimulationProblem(model, const)
@@ -140,8 +139,9 @@ decoder = DecoderProtKnockouts(ids)
 evalFunc = build_evaluation_function("targetFlux", ["r_2056"])
 
 eaConfig = EAConfigurations()
-optimProbConf = OptimProblemConfiguration(simulProblem, type=optimType.PROTEIN_KO, decoder=decoder,
-                                          evaluationFunc=evalFunc, EAConfig=eaConfig, scaleProblem=GeckoConfigurations.SCALE_CONSTANT)
+optimProbConf = OptimProblemConfiguration(simulProblem, type=optimType.PROTEIN_KO,
+                                          decoder=decoder, evaluationFunc=evalFunc, EAConfig=eaConfig,
+                                          scaleProblem=GeckoConfigurations.SCALE_CONSTANT)
 
 candidates = [{321, 51}, {65, 130, 259, 146, 660, 91}, {488, 266, 235, 558, 119, 220}, {81, 431}, {160, 425, 162, 606},
               {97, 330, 654, 212, 671}, {419, 589, 398, 302, 275, 214}, {64, 648, 275, 221, 574}, {11, 308, 21, 614},
@@ -202,10 +202,6 @@ def parallel_evolution(candidates, args):
         logger.debug('completed parallel_evaluation_mp in {0} seconds'.format(end - start))
         # print("--- %s seconds ---" % (time.time() - start), 'end_pop')
         return [r.get()[0] for r in results]
-
-
-
-
 
 
 if __name__ == '__main__':

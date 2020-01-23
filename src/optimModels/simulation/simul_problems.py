@@ -1,11 +1,8 @@
-import time
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 from framed.cobra.simulation import FBA, MOMA, ROOM, pFBA, lMOMA
-from framed.solvers import solver_instance, set_default_solver
-
+from framed.solvers import set_default_solver
 from cobra.flux_analysis import pfba
-
 from optimModels.utils.utils import MyPool
 from optimModels.simulation.simul_results import kineticSimulationResult, StoicSimulationResult, GeckoSimulationResult
 from optimModels.simulation.solvers import odespySolver
@@ -15,7 +12,6 @@ from optimModels.utils.constantes import solverStatus
 from cobra.util.solver import linear_reaction_coefficients
 from copy import copy
 from optlang.cplex_interface import Model
-import cobra
 
 try:
     import cPickle as pickle
@@ -111,8 +107,8 @@ class GeckoSimulationProblem(SimulationProblem):
     def get_uptake_reactions(self):
         drains = self.model.exchanges
         reacs = [r.id for r in drains if r.reversibility or
-                 (r.lower_bound < 0 and len(r.reactants) > 0) or
-                 (r.upper_bound > 0 and len(r.products) > 0)]
+                 (r.lower_bound < 0 < len(r.reactants)) or
+                 (r.upper_bound > 0 < len(r.products))]
         return reacs
 
     def get_internal_reactions(self):
@@ -144,7 +140,8 @@ class GeckoSimulationProblem(SimulationProblem):
             for p in proteins:
                 if "draw_prot_" + p in m.reactions:
                     r = m.reactions.get_by_id("draw_prot_" + p)
-                else: r = m.reactions.get_by_id("prot_" + p + "_exchange")
+                else:
+                    r = m.reactions.get_by_id("prot_" + p + "_exchange")
                 lb = r.lower_bound
                 ub = r.upper_bound
                 r.lower_bound = 0
@@ -158,12 +155,14 @@ class GeckoSimulationProblem(SimulationProblem):
 
     def simulate(self, overrideSimulProblem = None):
         """
-        This method preforms the phenotype simulation of the GeckoModel with the modifications present in the overrideSimulProblem.
+        This method preforms the phenotype simulation of the GeckoModel with
+            the modifications present in the overrideSimulProblem.
         Args:
-            overrideProblem (overrideStoicSimulProblem): override simulation Problem
+            overrideSimulProblem (overrideStoicSimulProblem): override simulation Problem
 
         Returns:
-            GeckoSimulationResult: Returns an object with the steady-state flux distribution, protein concentrations and solver status.
+            GeckoSimulationResult: Returns an object with the steady-state flux distribution,
+                protein concentrations and solver status.
         """
 
         new_constraints = OrderedDict()
@@ -269,8 +268,8 @@ class StoicSimulationProblem(SimulationProblem):
         if self.withCobraPy:
             drains = self.model.exchanges
             reacs = [r.id for r in drains if r.reversibility or
-                     (r.lower_bound < 0 and len(r.reactants) > 0) or
-                     (r.upper_bound > 0 and len(r.products) > 0)]
+                     (r.lower_bound < 0 < len(r.reactants)) or
+                     (r.upper_bound > 0 < len(r.products))]
         else:
             drains = list(self.model.get_exchange_reactions())
 
@@ -329,7 +328,7 @@ class StoicSimulationProblem(SimulationProblem):
         for d in drains:
             constraints[d] = (0, StoicConfigurations.DEFAULT_UB)
             solution = FBA(self.model, objective = self.objective, minimize = self.minimize, constraints = constraints)
-            if (solution.values is None or any([solution.values[rId] == 0 for rId in hasFlux])):
+            if solution.values is None or any([solution.values[rId] == 0 for rId in hasFlux]):
                 essential.append(d)
             constraints[d] = (StoicConfigurations.DEFAULT_LB, StoicConfigurations.DEFAULT_UB)
 
@@ -341,7 +340,8 @@ class StoicSimulationProblem(SimulationProblem):
         the modifications present in the instance of overrideSimulProblem.
 
         Args:
-            overrideProblem (OverrideStoicSimulProblem): Modification over the stoichiometric model and the default constraints.
+            overrideSimulProblem (OverrideStoicSimulProblem): Modification over the stoichiometric
+                model and the default constraints.
 
         Returns:
             StoicSimulationResult: Returns an object with the steady-state flux distribution, solver status, etc..
@@ -373,7 +373,7 @@ class KineticSimulationProblem(SimulationProblem):
             Metabolic model object.
         parameters : dict (optional)
             New values for the parameters present in the model.
-        t_steps : list
+        tSteps : list
             list of exact time steps to evaluate (default: [0,1e9])
         timeout : int
             Maximum time in secounds allowed to perform the simulation.
@@ -402,17 +402,19 @@ class KineticSimulationProblem(SimulationProblem):
 
     def simulate(self, overrideSimulProblem = None):
         """
-        This method preform the phenotype simulation of the kinetic model, using the solverId method and applying the modifications present in the instance of overrideSimulProblem.
+        This method preform the phenotype simulation of the kinetic model, using the solverId method
+            and applying the modifications present in the instance of overrideSimulProblem.
 
         Parameters
         -----------
-        overrideProblem : overrideKineticSimProblem
+        overrideSimulProblem : overrideKineticSimProblem
             Modification over the kinetic model.
 
         Returns
         --------
         out : kineticSimulationResult
-            Returns an object of type kineticSimulationResult with the steady-state flux distribution and concentrations.
+            Returns an object of type kineticSimulationResult with the steady-state
+                flux distribution and concentrations.
         """
 
         final_factors = {}
@@ -432,8 +434,8 @@ class KineticSimulationProblem(SimulationProblem):
                 self.get_time_steps()))
             try:
                 status, sstateRates, sstateConc = res.get(self.timeout)  # Wait timeout seconds for func to complete.
-            except Exception:
-                print("Aborting due to timeout")
+            except Exception as e:
+                print("Aborting due {}".format(e))
                 sstateRates = {}
                 sstateConc = {}
                 status = solverStatus.ERROR
@@ -446,7 +448,7 @@ class KineticSimulationProblem(SimulationProblem):
                                        overrideSimulProblem = overrideSimulProblem)
 
 
-## auxiliar functions
+# auxiliar functions
 def _run_stoic_simutation(model, objective, minimize, constraints, method):
     if method == 'FBA':
         solution = FBA(model, objective = objective, minimize = minimize, constraints = constraints)
@@ -469,8 +471,10 @@ def _run_stoic_simutation_with_cobra(model, constraints, minimize):
         for rId in list(constraints.keys()):
             reac = model.reactions.get_by_id(rId)
             reac.bounds = (constraints.get(rId)[0], constraints.get(rId)[1])
-        if minimize: solution = model.optimize(objective_sense = 'minimize')
-        else: solution = model.optimize(objective_sense = 'maximize')
+        if minimize:
+            solution = model.optimize(objective_sense = 'minimize')
+        else:
+            solution = model.optimize(objective_sense = 'maximize')
         # print("simulation time ", time)
         status = solverStatus.UNKNOWN
         if solution.status == "optimal":
@@ -485,7 +489,10 @@ def _my_kinetic_solve(model, finalParameters, finalFactors, initialConc, timePoi
     """
     finalRates = OrderedDict()
     f = model.get_ode(r_dict = finalRates, params = finalParameters, factors = finalFactors)
-    func = lambda x, t: f(t, x)
+
+    # func = lambda x, t: f(t, x)
+    def func(x, t):
+        return f(t, x)
 
     solver = odespySolver(KineticConfigurations.SOLVER_METHOD).get_solver(func)
     solver.set_initial_condition(list(initialConc.values()))
@@ -496,12 +503,12 @@ def _my_kinetic_solve(model, finalParameters, finalFactors, initialConc, timePoi
             if c < -1 * SolverConfigurations.RELATIVE_TOL:
                 return solverStatus.ERROR, {}, {}
 
-    except Exception:
-        print("Error on solver!!!")
+    except Exception as e:
+        print("Error on solver!!!: {}".format(e))
         return solverStatus.ERROR, {}, {}
 
     # values bellow solver precision will be set to 0
-    finalRates.update({k: 0 for k, v in finalRates.items() if
-                       v < SolverConfigurations.ABSOLUTE_TOL and v > - SolverConfigurations.ABSOLUTE_TOL})
+    finalRates.update({k: 0 for k, v in finalRates.items()
+                       if - SolverConfigurations.ABSOLUTE_TOL < v < SolverConfigurations.ABSOLUTE_TOL})
     conc = OrderedDict(zip(model.metabolites.keys(), X[1]))
     return solverStatus.OPTIMAL, finalRates, conc

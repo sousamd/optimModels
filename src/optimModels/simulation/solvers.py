@@ -23,7 +23,7 @@ class odespySolver:
         Returns: an instance of odeSolver
 
         """
-
+        solver = None
         if self.solverMethod is solverMethod.LSODA:
             solver = odespy.Lsoda(func)
         elif self.solverMethod is solverMethod.LSODAR:
@@ -43,7 +43,7 @@ class odespySolver:
         elif self.solverMethod is solverMethod.Dopri5:
             solver = odespy.Dopri5(func)
         elif self.solverMethod is solverMethod.Dop853:
-             solver = odespy.Dop853(func)
+            solver = odespy.Dop853(func)
         elif self.solverMethod is solverMethod.Vode:
             solver = odespy.Vode(func)
         elif self.solverMethod is solverMethod.AdamsBashforth2:

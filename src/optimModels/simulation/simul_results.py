@@ -1,7 +1,7 @@
 from optimModels.utils.constantes import solverStatus
 
 
-class SimulationResult():
+class SimulationResult:
     """
     Represents the result of a metabolic model simulation at steady-state.
     """
@@ -12,7 +12,7 @@ class SimulationResult():
         Create a Simulationresult instance.
 
         Args:
-            modelId (str): Identification of metabolic model
+            model (Model): Identification of metabolic model
             model: The model
             solverStatus (int): Simulation result (OPTIMAL = 0, UNKNOWN = 1, ERROR = 2).
             ssFluxesDistrib (dict): Fluxes distribution achieved in steady state.
@@ -74,12 +74,12 @@ class StoicSimulationResult(SimulationResult):
 
     # TODO: test
     def get_net_conversion(self, biomassId = None):
-        '''
+        """
            Returs a string representation of the net conversion
 
            args:
                 biosmassId (str) : optional
-        '''
+        """
 
         ssFluxes = self.get_fluxes_distribution()
 
@@ -116,7 +116,8 @@ class StoicSimulationResult(SimulationResult):
             biomassFlux = ssFluxes[biomassId]
             if biomassFlux > 0:
                 if firstRight:
-                    firstRight = False
+                    # firstRight = False
+                    pass
                 else:
                     right = right + " + "
                 right = right + str(biomassFlux)
@@ -169,7 +170,7 @@ class kineticSimulationResult(SimulationResult):
     """ Represents the result of a dynamic metabolic model simulation on steady-state.
 
     Args:
-        modelId (str): identification of metabolic model
+        model (Model): identification of metabolic model
         solverStatus (int): simulation result (OPTIMAL = 0, UNKNOWN = 1, ERROR = 2).
         ssFluxesDistrib (dict): fluxes distribution achieved in steady state.
         ssConcentrations (dict): metabolites concentration in steady state.

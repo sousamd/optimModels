@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
 
+
 class OverrideSimulationProblem:
     __metaclass__ = ABCMeta
 
@@ -12,6 +13,7 @@ class OverrideSimulationProblem:
     def simplify_modifications(self, simulationProblem, objFunction, fitness):
         pass
 
+
 class OverrideStoicSimulProblem(OverrideSimulationProblem):
     """
     This class contains the modifications that will be made to the stoichiometric model in the simulation process.
@@ -21,13 +23,13 @@ class OverrideStoicSimulProblem(OverrideSimulationProblem):
         """
         Create a instance of override stroichiometric simulation problem.
         Args:
-            constraints (dict): Dictionary with the new constraints to be applied in the simulation ("reac_id": (LB, UB)).
+            constraints (dict): Dictionary with the new constraints to be applied
+                in the simulation ("reac_id": (LB, UB)).
         """
         self.constraints = constraints
 
     def get_modifications(self):
         return self.constraints
-
 
     def simplify_modifications(self, simulationProblem, objFunction, fitness, candidate):
         """
@@ -38,6 +40,7 @@ class OverrideStoicSimulProblem(OverrideSimulationProblem):
             simulationProblem: simulation problem instance
             objFunction: function to calculate the fitness
             fitness: reference fitness
+            candidate: candidate solution
 
         """
         constraintsOrig = self.constraints.copy()
@@ -46,10 +49,12 @@ class OverrideStoicSimulProblem(OverrideSimulationProblem):
             try:
                 res = simulationProblem.simulate(self)
                 newFitness = objFunction.get_fitness(res, candidate=candidate)
-            except Exception:
+            except Exception as e:
+                print("Exception: {}".format(e))
                 newFitness = -1.0
             if round(fitness, 12) != round(newFitness, 12):
                 self.constraints[k] = constraintsOrig[k]
+
 
 class OverrideKineticSimulProblem(OverrideSimulationProblem):
     """
@@ -68,7 +73,6 @@ class OverrideKineticSimulProblem(OverrideSimulationProblem):
 
     def set_factors(self, values):
         if not isinstance(values, OrderedDict):
-            raise Exception ("Factors must be of type OrderedDict, where the key is the parameter id (vmax) and the value a double!")
+            raise Exception("Factors must be of type OrderedDict, where the key is the "
+                            "parameter id (vmax) and the value a double!")
         self.factors = values
-
-
