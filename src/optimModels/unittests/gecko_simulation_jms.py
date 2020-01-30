@@ -3,7 +3,7 @@ from optimModels.simulation.simul_problems import GeckoSimulationProblem
 from optimModels.simulation.override_simul_problem import OverrideStoicSimulProblem
 from optimModels.optimization.evaluation_functions import build_evaluation_function
 from optimModels.optimization.decoders import DecoderProtUnderOverExpression
-import pandas
+import pandas as pd
 import random
 from cobra.io import read_sbml_model
 
@@ -55,7 +55,7 @@ def simulate_wt(solver_name):
 
 
 def simulate_wt_multi():
-    some_measurements = pandas.Series({'P00549': 0.1, 'P31373': 0.1, 'P31382': 0.1})
+    some_measurements = pd.Series({'P00549': 0.1, 'P31373': 0.1, 'P31382': 0.1})
     model = GeckoModel('multi-pool')
     model.limit_proteins(some_measurements)
     res = model.optimize()
@@ -69,7 +69,7 @@ def analysis_growth(resFileName):
     levels = [0, 1e-10, 1e-8, 1e-6, 1e-4, 1e-2, 0.1]
     model = GeckoModel('single-pool')
     proteins = model.proteins
-    df = pandas.DataFrame(index = proteins, columns = levels)
+    df = pd.DataFrame(index = proteins, columns = levels)
 
     for p in proteins:
         print(p)
@@ -89,12 +89,12 @@ def analysis_growth(resFileName):
 
 def analysis_ko(resFileName):
     model = GeckoModel('single-pool')
-    df = pandas.DataFrame(index = range(100), columns = ["ko", "Biomass"])
+    df = pd.DataFrame(index = range(100), columns = ["ko", "Biomass"])
 
     for i in range(100):
         proteins = random.sample(model.proteins, 10)
         dic = {p: 0 for p in proteins}
-        model.limit_proteins(pandas.Series(dic))
+        model.limit_proteins(pd.Series(dic))
         res = model.optimize()
         df.loc[i] = (dic, res.objective_value)
     df.to_csv(resFileName)
@@ -140,8 +140,10 @@ def simulate_KO(model_sp, KO = [], prot_measure_fractions = None, prot_measure_g
 
     product = res.ssFluxesDistrib[target]
     biomass = res.ssFluxesDistrib[biom_reac]
+    glucose = res.ssFluxesDistrib['r_1714_REV']
     print('product', product)
     print('biomass', biomass)
+    print('glucose', glucose)
 
     evalFunc = build_evaluation_function("WYIELD", biom_reac, target, alpha = 0.3, minBiomassValue = minbiom)
     fit, min_targ, max_targ = evalFunc.get_fitness(res, KO)
@@ -208,11 +210,13 @@ def simulate_UO(model_sp, UO = {}, prot_measure_fractions = None, prot_measure_g
 
     product = res.ssFluxesDistrib[target]
     biomass = res.ssFluxesDistrib[biom_reac]
+    glucose = res.ssFluxesDistrib['r_1714_REV']
     print('product', product)
     print('biomass', biomass)
+    print('glucose', glucose)
 
     evalFunc = build_evaluation_function("WYIELD", biom_reac, target, alpha = 0.3, minBiomassValue = minbiom)
-    fit, min_targ, max_targ = evalFunc.get_fitness(res, UO)
+    fit, max_targ, min_targ = evalFunc.get_fitness(res, UO)
     print('fitness', fit)
     print('-------------------')
 
@@ -232,7 +236,7 @@ def simulate_UO(model_sp, UO = {}, prot_measure_fractions = None, prot_measure_g
                                                                                               min_targ, robust, names)
         save_to_csv("./results_confirm.csv", results_line)
         # print(results_line)
-
+    return min_targ
 
 def ecoli_model_KO(KO = [], constraints = {}):
     SBML_FILE = '../../../examples/models/eciML1515_batch.xml'
@@ -417,7 +421,9 @@ if __name__ == "__main__":
     # print([x for x in proteins1 if x in proteins2])
 
     # Yeast
-    const_aero = {'r_1714_REV': (0, 10)}  # glucose
+    const_aero = {
+        'r_1714_REV': (0, 10) , # glucose
+        }
     const_anaerobic = {
         'r_1714_REV': (0, 10),  # glucose
         'r_1992_REV': (0, 0),  # oxygen
@@ -433,13 +439,26 @@ if __name__ == "__main__":
     # min_biom = 0.03112  # aero
     # # min_biom = 0.00518  # anaero
 
-    KO = ['P42941', 'P54115', 'P37299', 'P37303', 'P46969', 'Q12680', 'P14065']
-    UO = {'P60752': (0, 2), 'P00864': (0, 32), 'P0ABB4': (0, 32), 'P0AD65': (0, 0.25), 'P46022': (0, 32),
-          'P16701': (0, 0.5), 'P0ABG1': (0, 8), 'P06983': (0, 32), 'P05042': (0, 0.25), 'P0ABP8': (0, 0.0625)}
+    # KO = ['P33330', 'P07256', 'P11412', 'Q12680', 'P14065', 'P54115', 'P41939']  # new wyield
+    KO = [ 'P39708', 'P37303', 'P21801', 'P33330']    # no cytochromes; excluded: 'P25332', 'Q03677' and 'P32179'
+    # KO = ['P21801', 'P23501', 'P53982', 'P34227']  # old solution bpcy
+    # UO = {'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4), 'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}  # wyield
+    UO = {'P53199': (0, 0.0625), 'P53615': (0, 0.125), 'P28240': (0, 32), 'P21801': (0, 0.03125), 'P14180': (0, 0.0625), 'P43577': (0, 0.0625), 'P25641': (0, 16), 'P32347': (0, 0.5), 'Q06346': (0, 32), 'Q12349': (0, 2), 'P53318': (0, 0.125), 'P15454': (0, 0.0625), 'P38986': (0, 0.25), 'P28789': (0, 0.0625), 'P40017': (0, 16)}
 
     # saveflag = True
     saveflag = False
 
-    fluxes, model = simulate_KO(model_sp = "Yeast", KO = KO, constraints = const_aero, minbiom = min_biom,
-                                save = saveflag)
-    # simulate_UO(model_sp = "Ecoli", UO = UO, constraints = const_aero, minbiom = min_biom, save = saveflag)
+    # simulate_KO(model_sp = "Yeast", KO = KO, constraints = const_aero, minbiom = min_biom,
+    #                             save = saveflag)
+    # simulate_UO(model_sp = "Yeast", UO = UO, constraints = const_aero, minbiom = min_biom, save = saveflag)
+
+solutions = pd.read_csv("wyield1000_UO_AERO_SUCC_max_no_cytochromes15.csv", sep = ";", skiprows = 2, skipfooter = 103, engine = "python")
+solutions = solutions.sort_values('Fitness', ascending = False).drop_duplicates(['Reactions']).sort_index()
+solutions = solutions[solutions['Fitness'] > 0.1].Reactions
+for sol in solutions[:100]:
+    sol = eval(sol)
+    print(sol)
+    min = simulate_UO(model_sp = "Yeast", UO = sol, constraints = const_aero, minbiom = min_biom, save = saveflag)
+    if min > 0.1:
+        print("AAAQQUUUIIIII")
+        break
