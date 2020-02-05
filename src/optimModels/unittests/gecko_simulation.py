@@ -157,7 +157,7 @@ def simulate_KO(target, KOs=[[]], prot_measure_fractions=None, prot_measure_ggdw
                            'candidate':solutions}, columns=['fitness','biomass', 'succ_bio', 'max_succ', 'min_succ', 'candidate'])
     df.to_excel('C:/Users/BiSBII/Results/multi_pool/aero_multi/simulation.xlsx')
 
-def simulate_UO(target, wt_concentrations=[], wt_fluxes=[], UOs=[], prot_measure_fractions=None, prot_measure_ggdw=None, constraints={}, minBiomassValue=None, objective={'r_2111':1}, minimize=False):
+def simulate_UO(target, wt_concentrations = [], wt_fluxes = [], UOs = [], prot_measure_fractions = None, prot_measure_ggdw = None, constraints = {}, minBiomassValue = None, objective = {'r_2111':1}, minimize = False):
 
     if prot_measure_fractions is None and prot_measure_ggdw is None:
         model = GeckoModel("single-pool")
@@ -168,13 +168,12 @@ def simulate_UO(target, wt_concentrations=[], wt_fluxes=[], UOs=[], prot_measure
         else:
             model.limit_proteins(ggdw=prot_measure_ggdw)
 
-
     simulProb = GeckoSimulationProblem(model, constraints=constraints, objective=objective, minimize=minimize)
 
 
-    simulProb.wt_concentrations = simulProb.simulate().get_protein_concentrations()
-    simulProb.wt_fluxes = wt_fluxes
-    simulProb._protein_rev_reactions = simulProb.get_protein_rev_reactions()
+    simulProb.wt_concentrations = wt_concentrations
+    # simulProb.wt_fluxes = wt_fluxes
+    # simulProb._protein_rev_reactions = simulProb.get_protein_rev_reactions()
 
 
     criticalProteins = []
@@ -184,13 +183,6 @@ def simulate_UO(target, wt_concentrations=[], wt_fluxes=[], UOs=[], prot_measure
     decoder = DecoderProtUnderOverExpression(proteins, levels=LEVELS)
 
 
-    fits = []
-    bios = []
-    succs_bio = []
-    maxs = []
-    mins = []
-    solutions = []
-
     for UO in UOs:
         candidate = set(decoder.decode_candidate_ids_to_index(identifiers=UO))
         override = decoder.get_override_simul_problem(candidate=candidate, simulProblem=simulProb)
@@ -198,21 +190,12 @@ def simulate_UO(target, wt_concentrations=[], wt_fluxes=[], UOs=[], prot_measure
         succ_bio = res.ssFluxesDistrib[target]
         bio = res.ssFluxesDistrib['r_2111']
 
-
-
         print('product', succ_bio)
         print('biomass', bio)
-        #print('glucose', res.ssFluxesDistrib['r_1714_REV'])
-        print('DIR')
-        print(res.ssFluxesDistrib['r_0659No1'])
-
-        print('REV')
-        print(res.ssFluxesDistrib['r_0659_REVNo1'])
-
+        print('glucose', res.ssFluxesDistrib['r_1714_REV'])
 
         # bios.append(bio)
         # succs_bio.append(succ_bio)
-
 
 
         # evalFunc = build_evaluation_function("WYIELD", "r_2111", "r_2056", alpha=0.3, minBiomassValue=minBiomassValue)
@@ -406,7 +389,6 @@ def define_wt_values(prot_measure_fractions=None, prot_measure_ggdw=None, constr
 
     for prot in prot_over:
         if wt_concentrations[prot] == 0:
-            print(prot)
             wt_concentrations[prot] = 0.00000001
 
     return wt_concentrations
@@ -448,12 +430,10 @@ if __name__ =="__main__":
                        'r_0487No1':(0,0), 'r_0472No1':(0,0),
                        'r_4046':(0,0)}
 
-    ggdw = convert_mmol_to_g('sanchez-mmol_gdw.csv')
+    ggdw = convert_mmol_to_g("C:/Users/theze/Anaconda3/Lib/site-packages/geckopy/data_files/sanchez-mmol_gdw.csv")
 
-    #wt_concentrations = define_wt_values(constraints=const_anaerobic)#, prot_measure_ggdw=ggdw)
-    #print(wt.sum())
-    #wt_concentrations = wt
-    #wt_fluxes = wt[1]
+    wt_concentrations = define_wt_values(constraints=const_aero, prot_measure_ggdw=ggdw)
+
 
     # print(wt_concentrations['P17505']) #sim
     # print(wt_concentrations['P22133']) #sim
@@ -502,35 +482,25 @@ if __name__ =="__main__":
 
     #uo = [{'P41939':(0,0), 'P00890':(0,10), 'P11412':(0,0), 'P37298':(0,0), 'P21954':(0,0.1), 'P28834':(0,0.5)}]
 
-    # level = 4
-    # uo = [{'P12695': (0, 2), 'P28240': (0, 8), 'P41939': (0, 16), 'P00359': (0, 2), 'P11154': (0, 2), 'P20967': (0, 8), 'P16451': (0, 4), 'P46971': (0, 32), 'Q12233': (0, 4), 'P16387': (0, 4), 'Q05584': (0, 16), 'P17423': (0, 0.0625), 'P09624': (0, 4), 'P19262': (0, 2), 'P32614': (0, 4), 'P22580': (0, 0.25), 'P53312': (0, 8), 'P16862': (0, 4)},
-    #       {'P46971': (0, 32), 'Q12233': (0, 4), 'P28240': (0, 8), 'P12695': (0, 2), 'P41939': (0, 16), 'P16387': (0, 4), 'Q05584': (0, 16), 'P17423': (0, 0.0625), 'P00359': (0, 2), 'P11154': (0, 2), 'P09624': (0, 4), 'P19262': (0, 2), 'P32614': (0, 4), 'P20967': (0, 8), 'P16451': (0, 4), 'P53312': (0, 8), 'P16862': (0, 4)},
-    #       {'P37292': (0, 2), 'P33330': (0, 8), 'Q12233': (0, 4), 'P12695': (0, 2), 'P28240': (0, 8), 'P16387': (0, 4),
-    #        'P30952': (0, 16), 'P17423': (0, 0.0625), 'P00359': (0, 2), 'P11154': (0, 2), 'P09624': (0, 4),
-    #        'P19262': (0, 2), 'P38113': (0, 2), 'P32614': (0, 4), 'Q12189': (0, 8), 'P20967': (0, 8), 'P16451': (0, 4),
-    #        'P16862': (0, 4)},
-    #       {'P46971': (0, 32), 'Q12452': (0, 0.125), 'P28240': (0, 8), 'P47164': (0, 0.125), 'Q07804': (0, 0.25),
-    #        'P00359': (0, 2), 'P09624': (0, 4), 'P38113': (0, 2), 'P32614': (0, 4), 'P49775': (0, 0.5)}
-    #       ]
-    #
-    #
-    # UO = [{
-    #     'P17505': (0, level),
-    #     'P22133': (0, level),
-    #     'P11154': (0, level),
-    #     'P28240': (0, level),
-    #     'P08417': (0, level),
-    #     'P32327': (0, level),
-    #     'P30952': (0, level),
-    #     'P21826': (0, level),
-    #     'P10963': (0, level),
-    #     'P32614': (0, level),
-    #     'P32419': (0, level),
-    #     'P38113': (0,0),
-    #     'P00330': (0,0)}]
-    #     # 'P26263':(0,0),
-    #      #'P16467':(0,0)}]
-    #      #'P06169':(0,0)}]
+    level = 4
+
+    UO = [{
+        'P17505': (0, level),
+        'P22133': (0, level),
+        'P11154': (0, level),
+        'P28240': (0, level),
+        'P08417': (0, level),
+        'P32327': (0, level),
+        'P30952': (0, level),
+        'P21826': (0, level),
+        'P10963': (0, level),
+        'P32614': (0, level),
+        'P32419': (0, level),
+        'P38113': (0,0),
+        'P00330': (0,0)}]
+        # 'P26263':(0,0),
+         #'P16467':(0,0)}]
+         #'P06169':(0,0)}]
 
 
    # UO = [{'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4),  'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}]
@@ -538,10 +508,12 @@ if __name__ =="__main__":
 
     # UO = [{'P11412': (0, 0), 'P28834': (0, 0.5), 'P41939': (0, 0), 'P21954': (0, 0.1), 'P37298': (0, 0), 'P00890': (0, 10)}]
 
-    UO = [{'P41939':(0,10)}]
 
     # print('max biomass')
-    bio = simulate_UO(target='r_2056', wt_concentrations= [], wt_fluxes=[], UOs=[{}], constraints=const_aero, minBiomassValue=minBiomassValue_aero)#, prot_measure_ggdw=ggdw)
+    objective_succ = {'r_2056':1}  #
+    const_aero.update({"r_2111": (0.019202761342810366*0.99, 1000)})
+    bio = simulate_UO(target='r_2056', objective = objective_succ, wt_concentrations = wt_concentrations, wt_fluxes=[], UOs=UO, constraints=const_aero, minBiomassValue=minBiomassValue_aero, prot_measure_ggdw=ggdw)
+
 
     # print('99%')
     # const_anaerobic['r_2111'] = (bio*0.99, 1000)

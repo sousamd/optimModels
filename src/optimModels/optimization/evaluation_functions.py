@@ -387,7 +387,7 @@ class WYIELD(EvaluationFunction):
             res = (self.alpha * fvaMaxProd + (1 - self.alpha) * fvaMinProd)
             if self.scale:
                 res = res / biomassFluxValue
-        return res, fvaMaxProd, fvaMinProd
+        return res
 
     def method_str(self):
         return "WYIELD "
@@ -405,32 +405,32 @@ class WYIELD(EvaluationFunction):
         return ["Biomass id", "Product id"]
 
 
-def build_evaluation_function(id, *args, **kwargs):
+def build_evaluation_function(eval_id, *args, **kwargs):
     """
     Function to return an evaluation function instance.
 
     Args:
-        id (str): Name of the objective function. The implemented objective
+        eval_id (str): Name of the objective function. The implemented objective
             functions should be registed in constants.objFunctions class
-        *args (list of str): The number of arguments depends of the objective function chosen by user.
+        *args (type depends on id): The number of arguments depends of the objective function chosen by user.
         **kwargs dictionary of additional optional arguments
     Returns:
         EvaluationFunction: return an evaluation function instance.
     """
 
-    if id == BPCY.get_id():
+    if eval_id == BPCY.get_id():
         objFunc = BPCY(args[0], args[1], args[2])
-    elif id == WYIELD.get_id():
+    elif eval_id == WYIELD.get_id():
         objFunc = WYIELD(args[0], args[1], **kwargs)
-    elif id == TargetFlux.get_id():
+    elif eval_id == TargetFlux.get_id():
         objFunc = TargetFlux(args[0])
-    elif id == MinCandSize.get_id():
+    elif eval_id == MinCandSize.get_id():
         objFunc = MinCandSize(args[0], args[1])
-    elif id == BP_MinModifications.get_id():
+    elif eval_id == BP_MinModifications.get_id():
         objFunc = BP_MinModifications(args[0], args[1])
-    elif id == MinCandSizeWithLevelsAndMaxTarget.get_id():
+    elif eval_id == MinCandSizeWithLevelsAndMaxTarget.get_id():
         objFunc = MinCandSizeWithLevelsAndMaxTarget(args[0], args[1], args[2])
-    elif id == MinCandSizeAndMaxTarget.get_id():
+    elif eval_id == MinCandSizeAndMaxTarget.get_id():
         objFunc = MinCandSizeAndMaxTarget(args[0], args[1])
     else:
         raise Exception("Wrong objective function!")

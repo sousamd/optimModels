@@ -236,7 +236,7 @@ def simulate_UO(model_sp, UO = {}, prot_measure_fractions = None, prot_measure_g
                                                                                               min_targ, robust, names)
         save_to_csv("./results_confirm.csv", results_line)
         # print(results_line)
-    return min_targ
+
 
 def ecoli_model_KO(KO = [], constraints = {}):
     SBML_FILE = '../../../examples/models/eciML1515_batch.xml'
@@ -321,6 +321,7 @@ def ecoli_model_UO(UO = {}, constraints = {}):
 
     res = simulProb.simulate(override)
 
+    # # Biotin
     # print("Biotin reactions:")
     # dbts = res.ssFluxesDistrib["DBTSNo1"]
     # print('dethibiotin synth', dbts)
@@ -439,26 +440,25 @@ if __name__ == "__main__":
     # min_biom = 0.03112  # aero
     # # min_biom = 0.00518  # anaero
 
+    # DSM
+    ko_proteins = ["P38113", "P00330"]
+    ko_proteins_dic =  {"draw_prot_{}".format(x): (0, 0) for x in ko_proteins}
+    ko_proteins_dic.update(const_aero)
+    zero_bounds = ["P30952", "P21823", "P10963", "P32614", "P32419"]
+    zero_bounds_dic =  {"draw_prot_{}".format(x): (0, 0.00000001) for x in zero_bounds}
+    ko_proteins_dic.update(zero_bounds_dic)
+    over_proteins = ["P32327", "P11154", "P10963", "P17505", "P22133", "P32419",
+                     "P08417", "P32614", "P28240", "P21826", "P30952", "P30952"]
+    over_proteins_dic = {x: (0, 4) for x in over_proteins}
+
     # KO = ['P33330', 'P07256', 'P11412', 'Q12680', 'P14065', 'P54115', 'P41939']  # new wyield
-    KO = [ 'P39708', 'P37303', 'P21801', 'P33330']    # no cytochromes; excluded: 'P25332', 'Q03677' and 'P32179'
+    KO = [ 'P39708', 'P37303', 'P21801', 'P33330']    # no cytochromes; removed: 'P25332', 'Q03677' and 'P32179'
     # KO = ['P21801', 'P23501', 'P53982', 'P34227']  # old solution bpcy
-    # UO = {'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4), 'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}  # wyield
-    UO = {'P53199': (0, 0.0625), 'P53615': (0, 0.125), 'P28240': (0, 32), 'P21801': (0, 0.03125), 'P14180': (0, 0.0625), 'P43577': (0, 0.0625), 'P25641': (0, 16), 'P32347': (0, 0.5), 'Q06346': (0, 32), 'Q12349': (0, 2), 'P53318': (0, 0.125), 'P15454': (0, 0.0625), 'P38986': (0, 0.25), 'P28789': (0, 0.0625), 'P40017': (0, 16)}
+    UO = {'Q12122': (0, 2), 'P38858': (0, 4), 'P09624': (0, 4), 'P54115': (0, 0.125), 'P00127': (0, 0.03125), 'P28240': (0, 32), 'P31116': (0, 0.125), 'P43567': (0, 0.5)}  # wyield
+    # UO = {'Q99258': (0, 0.25), 'P47096': (0, 2), 'P04046': (0, 0.125), 'P43623': (0, 0.25), 'Q06702': (0, 0.125), 'Q08548': (0, 0.25), 'P40025': (0, 0.5)}  # no cytochromes
 
     # saveflag = True
     saveflag = False
-
-    # simulate_KO(model_sp = "Yeast", KO = KO, constraints = const_aero, minbiom = min_biom,
-    #                             save = saveflag)
+    # simulate_KO(model_sp = "Yeast", KO = KO, constraints = const_aero, minbiom = min_biom, save = saveflag)
     # simulate_UO(model_sp = "Yeast", UO = UO, constraints = const_aero, minbiom = min_biom, save = saveflag)
-
-solutions = pd.read_csv("wyield1000_UO_AERO_SUCC_max_no_cytochromes15.csv", sep = ";", skiprows = 2, skipfooter = 103, engine = "python")
-solutions = solutions.sort_values('Fitness', ascending = False).drop_duplicates(['Reactions']).sort_index()
-solutions = solutions[solutions['Fitness'] > 0.1].Reactions
-for sol in solutions[:100]:
-    sol = eval(sol)
-    print(sol)
-    min = simulate_UO(model_sp = "Yeast", UO = sol, constraints = const_aero, minbiom = min_biom, save = saveflag)
-    if min > 0.1:
-        print("AAAQQUUUIIIII")
-        break
+    simulate_UO(model_sp = "Yeast", UO = over_proteins_dic, constraints = ko_proteins_dic, minbiom = min_biom, save = saveflag)
