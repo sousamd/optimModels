@@ -372,14 +372,12 @@ class WYIELD(EvaluationFunction):
             fvaMinResult = an.FBA(model, objective = {self.productId: 1}, minimize = True, constraints = constraints)
             if fvaMinResult:
                 fvaMinProd = fvaMinResult[self.productId]
-                print('min', fvaMinProd)
 
         # only need to simulate FVA max if alpha is larger than 0, otherwise it will always be zero
         if self.alpha > 0:
             fvaMaxResult = an.FBA(model, objective = {self.productId: 1}, constraints = constraints)
             if fvaMaxResult:
                 fvaMaxProd = fvaMaxResult[self.productId]
-                print('max', fvaMaxProd)
 
         res = self.worstFitness
 
@@ -387,6 +385,10 @@ class WYIELD(EvaluationFunction):
             res = (self.alpha * fvaMaxProd + (1 - self.alpha) * fvaMinProd)
             if self.scale:
                 res = res / biomassFluxValue
+        print('fitness', res)
+        print('min', fvaMinProd)
+        print('max', fvaMaxProd)
+        print('----------------')
         return res
 
     def method_str(self):

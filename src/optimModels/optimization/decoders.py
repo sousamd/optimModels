@@ -514,7 +514,7 @@ class DecoderProtUnderOverExpression(Decoder):
         """ Build the override simulation problem which will contains the modifications that
         must be applied to the model in order to simulate the under/over proteins expression.
         Args:
-            candidate (dict):  candidate represented using proteins and levels indexes.
+            candidate (set):  candidate represented using proteins and levels indexes.
             simulProblem (SimulationProblem): all information required to perform a model simulation.
 
         Returns: OverrideSimulProblem instance with the modifications to be applied over the simulation Problem.
