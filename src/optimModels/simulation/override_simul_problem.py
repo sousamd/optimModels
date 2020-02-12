@@ -10,7 +10,7 @@ class OverrideSimulationProblem:
         pass
 
     @abstractmethod
-    def simplify_modifications(self, simulationProblem, objFunction, fitness):
+    def simplify_modifications(self, simulationProblem, objFunction, fitness, candidate):
         pass
 
 

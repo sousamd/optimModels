@@ -11,7 +11,7 @@ def load_kinetic_model(filename, kmap = None):
     """
     Load the dynamic model present in a SBML file.
     Args:
-        filename (str): SBBML file.
+        filename (str): SBML file.
         kmap (dict): Dictionary with the parameters that can be used in the strain
             optimization process for each reaction.{id_reaction: [param1, param2]}
 

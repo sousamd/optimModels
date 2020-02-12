@@ -38,7 +38,7 @@ def gecko_optimization(model, optim_type, eval_fun, **kwargs):
     cand_size = kwargs.get("size", None)
     output_file = kwargs.get("output_file", "results.csv")
 
-    gecko_strain_optim(
+    res = gecko_strain_optim(
         simulProblem = gecko_simul_problem,
         evaluationFunc = eval_fun,
         levels = gecko_uo_levels,
@@ -48,6 +48,7 @@ def gecko_optimization(model, optim_type, eval_fun, **kwargs):
         candidateSize = cand_size,
         resultFile = output_file
         )
+    return res
 
 
 if __name__ == "__main__":
