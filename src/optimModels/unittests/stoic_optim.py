@@ -83,3 +83,4 @@ if __name__ == "__main__":
         size = 10,  # chose max number of alterations, None uses default
         output_file = "optimization_results.csv"   # chose path of the results file
         )
+    print(result)
