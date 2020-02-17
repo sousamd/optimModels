@@ -98,7 +98,7 @@ def cbm_strain_optim(simulProblem, evaluationFunc,
         reacsToManipulate = [x for x in simulProblem.get_internal_reactions()
                              if x not in criticalReacs and x not in simulProblem.objective.keys()]
     else:
-        raise Exception("cbm_strain_optim:NOT IMMPLEMENTED!")
+        raise Exception("cbm_strain_optim: NOT IMMPLEMENTED!")
 
     # build decoder
     if type == optimType.REACTION_KO:

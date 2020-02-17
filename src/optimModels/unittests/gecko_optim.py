@@ -7,13 +7,13 @@ from optimModels.optimization.evaluation_functions import build_evaluation_funct
 from optimModels.unittests.gecko_simul import convert_mmol_to_g, loading_yeast_gecko, loading_any_gecko
 
 
-def gecko_optimization(model, optim_type, eval_fun, **kwargs):
+def gecko_optimization(model, optim_type, eval_func, **kwargs):
     """
     This function is a default template for any gecko optimization
 
     :param GeckoModel model: GeckoModel object from geckopy
     :param str optim_type: "KO" - Knockouts or "UO" - Under/Over expression
-    :param build_evaluation_function() eval_fun: evaluating function
+    :param build_evaluation_function() eval_func: evaluating function
     :param kwargs: all of the optional arguments
     :return: None
     """
@@ -40,7 +40,7 @@ def gecko_optimization(model, optim_type, eval_fun, **kwargs):
 
     res = gecko_strain_optim(
         simulProblem = gecko_simul_problem,
-        evaluationFunc = eval_fun,
+        evaluationFunc = eval_func,
         levels = gecko_uo_levels,
         type = optim_type,
         criticalProteins = critical_proteins,
@@ -91,7 +91,7 @@ if __name__ == "__main__":
     gecko_optimization(
         model = yeast_single_pool,
         optim_type = "KO",   # KO or UO
-        eval_fun = gecko_eval_function,
+        eval_func = gecko_eval_function,
         constraints = {},  # contraints format: {"reac_id": (lb, up), ...}
         critical_proteins = "auto",  # can also use a list of proteins
         isMultiProc = False,  # replace with True to use multi-processing

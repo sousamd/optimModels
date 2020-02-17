@@ -1,6 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from collections import OrderedDict
-
 from optimModels.simulation.simul_problems import KineticSimulationProblem, \
     StoicSimulationProblem, GeckoSimulationProblem
 from optimModels.simulation.override_simul_problem import OverrideKineticSimulProblem, OverrideStoicSimulProblem

@@ -26,6 +26,14 @@ def build_chassaganole_map():
 
 
 def kinetic_optimization(model, optim_type, eval_func, **kwargs):
+    """
+    default template function for kinetic model optimization
+    :param load_kinetic_model() model: kinetic model object
+    :param str optim_type: "KO" - Knockouts or "UO" - Under/Over expression
+    :param build_evaluation_function() eval_func: evaluating function
+    :param kwargs: all of the optional arguments
+    :return kinetic_strain_optim(): result of the optimization
+    """
     output_file = kwargs.get("output_file", "results.csv")
     time = kwargs.get("time", KineticConfigurations.STEADY_STATE_TIME)
     cand_size = kwargs.get("size", None)
