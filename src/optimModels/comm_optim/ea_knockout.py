@@ -1,8 +1,6 @@
-import time
 from optimModels.comm_optim.CModel import *
 from optimModels.comm_optim.ea_setup import *
 from copy import deepcopy
-from framed import load_cbmodel
 
 
 def generate_ids(ids_direc = None, namelist = None, sep = "_"):

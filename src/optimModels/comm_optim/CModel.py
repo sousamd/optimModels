@@ -1,6 +1,5 @@
 from optimModels.comm_optim import ea_knockout
 from optimModels.comm_optim.ea_setup import *
-from copy import deepcopy
 from framed import load_cbmodel, FBA, Community, Environment
 
 
