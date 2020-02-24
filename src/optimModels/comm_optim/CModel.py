@@ -1,6 +1,6 @@
 from optimModels.comm_optim import ea_knockout
 from optimModels.comm_optim.ea_setup import *
-from framed import load_cbmodel, FBA, Community, Environment
+from framed import FBA, Community, Environment
 
 
 class CModel:
@@ -228,29 +228,4 @@ class IModel:
 
 
 if __name__ == "__main__":
-    import os
-    import optimModels
-    optimmodels_path = os.path.dirname(optimModels.__file__)
-    models_path = os.path.abspath(os.path.join(optimmodels_path, os.pardir, os.pardir, "examples", "models"))
-
-    model1 = "Yokenella_regensburgei_ATCC_43003.xml"
-    model2 = "Acinetobacter_junii_SH205.xml"
-    model3 = "Clostridiales_sp_1_7_47FAA.xml"
-    model4 = "Achromobacter_xylosoxidans_A8.xml"
-    model5 = "Achromobacter_xylosoxidans_NBRC_15126.xml"
-    model6 = "Acidaminococcus_intestini_RyC_MR95.xml"
-    model7 = "Acidaminococcus_sp_D21.xml"
-    model8 = "Acinetobacter_calcoaceticus_PHEA_2.xml"
-    model9 = "Acinetobacter_lwoffii_WJ10621.xml"
-    model10 = "Actinobacillus_pleuropneumoniae_L20.xml"
-    model_list = [model1, model2, model3, model4, model5, model6, model7, model8, model9, model10]
-
-    list_models = [load_cbmodel(filename = str(os.path.join(models_path, model)),
-                                flavor = "cobra:other") for model in model_list]
-    fit = "R_EX_M_taur__91__e__93___e_pool"
-    test_reac = "R_EX_M_succ__91__e__93___e_pool"
-
-    create_cm = CModel("testing", list_models)
-    run_options = [("random", [1, 0, 1, 0, 0, 0, 0, 0, 0]), ("tourn", 1)]
-    ea_run = create_cm.ea(options = run_options, quantity = 3, obj_list = [], fitness = None, goal = None)
-    print(ea_run)
+    pass

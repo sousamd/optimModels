@@ -1,3 +1,4 @@
+import os
 from optimModels.comm_optim.CModel import *
 from optimModels.comm_optim.ea_setup import *
 from copy import deepcopy
