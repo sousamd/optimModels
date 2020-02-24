@@ -1,8 +1,0 @@
-.DS_Store
-.project
-.pydevproject
-*.pyc
-*.log
-.idea/
-dist
-src/optimModels.egg-info
