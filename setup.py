@@ -2,10 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name = 'optimModels',
-    version = '0.0.3',
+    version = '0.0.4',
     package_dir = {'': 'src'},
     packages = find_packages('src'),
-    install_requires = ['odespy', 'inspyred', 'framed', 'geckopy', 'cobra', 'optlang', 'pandas', 'numpy'],
+    install_requires = ['inspyred', 'framed', 'geckopy', 'cobra', 'optlang', 'pandas', 'numpy'],
     author = 'Sara Correia',
     author_email = 'sarag.correia@gmail.com',
     description = 'optimModels - strain optimization',

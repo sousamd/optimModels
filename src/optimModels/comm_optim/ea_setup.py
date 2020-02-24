@@ -12,8 +12,8 @@ class EAConfig:
                  cand_size = 10,
                  max_cand_value = 8,    # for real and int representation
                  rep = 0,                       # 0 = binary, 1 = integer, else = real
-                 pop_size = 15,           # min = 2
-                 max_gen = 5
+                 pop_size = 10,           # min = 2
+                 max_gen = 3
                  ):
         """
 

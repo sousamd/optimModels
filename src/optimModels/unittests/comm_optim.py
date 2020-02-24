@@ -4,6 +4,30 @@ from framed import load_cbmodel
 from optimModels.comm_optim.CModel import CModel
 from optimModels.comm_optim.ea_setup import change_config
 
+
+def create_options(first = "random", new = "tourn", **kwargs):
+    sample = kwargs.get("sample", [])
+    quantity = kwargs.get("quantity", 1)
+
+    if first == "random":
+        fp_tuple = (first, None)
+    elif first == "headstart":
+        fp_tuple = (first, sample)
+    else:
+        raise Exception("First Population option not supported.")
+
+    if new == "tourn":
+        np_tuple = (new, None)
+    elif new == "keep":
+        np_tuple = (new, sample)
+    elif new == "changeworst":
+        np_tuple = (new, quantity)
+    else:
+        raise Exception("New Population option not supported.")
+
+    return [fp_tuple, np_tuple]
+
+
 if __name__ == "__main__":
     # Step 1
     # Load any ammount of models in framed objects
@@ -46,37 +70,34 @@ if __name__ == "__main__":
         )
 
     # 3.2 Configure the type of optimization
-    ea_optim_options = [  # this is a list with two tuples
-        (  # this first tuple configures the inital population
-            "random",  # "random" is random, "headstart" forces  some organisms in all solutions
-            [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]  # only with headstart, needs sample, see comment after the list*
-            ),
-        (  # this tuple conifgures the creation of the follwing generations
-            "tourn",  # "tourn" is default, "changeworst" replaces the worst, "keep" pairs with "headstart"
-            [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]  # changeworst needs integer, keep needs sample, see comment after*
-            )
-        ]
+    ea_optim_options = create_options(
+        first = "random",
+        new = "tourn"
+        )
+    # this function defines the method of creating the first and subsequent populations
+    # on first: there is "random" and "headstart"
+    # on new: there is "tourn", "keep", and "changeworst"
+    # changeworst requires the aditional argument quantity (int),
+    # indicating the number of least performing organisms to be swaped out each gen
+    # headstart and keep, require the aditional argument sample (list)
+    # sample format depends on the quantity argument of the comm_model.ea() function
+    # if quantity = 0, sample is a list of 1s and 0s indicating the organisms present with 1s
+    # example =  [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+    # elif quantity > 0, sample is a list of ints indicating the position of the organisms
+    # example: [1, 0, 1, 0, 0, 0, 0, 0, 0, 0] == [0, 2]
+    # below are some examples
 
-    # *the second position of each tuple is used for some of the options in the first position of each tuple
-    # when selecting headstart or keep, you need to provide a sample of the organisms you want to keep
-    # the format of this sample, however, changes with the quantity option in the ea function below
-    # if the quantity is set at 0, then the sample is an integer list as set above. this is list should be the same
-    # size of the number of models in the CModel object. in that list you should place 1 in the positions of the
-    # models you want to keep, and 0 in the positions that are to be changeable.
-    # if, however, you set a integer value to the quantity in the ea function, the sample is in integer format
-    # intead of binary, where you select, directly the positions you want to keep
-    # meaning, [1, 0, 1, 0, 0, 0, 0, 0, 0, 0] = [0, 2]
-    # when using changeworst, to create new candidates, the algorithm takes exhisting ones, checks,
-    # the performance of each individual organism and swaps out an x number of the worst performing
-    # organisms for the objective provided. This x is the integer you should place in the second position
-    # of the second tuple in that case in the next lines some examples will be commented
-
-    options_1 = [("random", None), ("tourn", None)]  # default settings, completely random
-    options_2a = [("headstart", [1, 0, 1, 0, 0, 0, 0, 0, 0, 0]), ("keep", [1, 0, 1, 0, 0, 0, 0, 0, 0, 0])]  # keeps
-    # organisms  in all solutions, when quantity = 0
-    options_2b = [("headstart", [0, 2]), ("keep", [0, 2])]  # equal to 2a but for quantity > 0
-    options_3 = [("random", None), ("changeworst", 2)]  # changes the 2 worst performing organisms of
-    # each candidate every generation
+    options_1 = create_options()  # default settings, completely random
+    options_2a = create_options(  # keeps organisms in all solutions, when quantity = 0
+        first = "headstart",
+        new = "keep",
+        sample = [1, 0, 1, 0, 0, 0, 0, 0, 0, 0])
+    options_2b = create_options(  # keeps organisms in all solutions, when quantity > 0
+        first = "headstart",
+        new = "keep",
+        sample = [0, 2])
+    options_3 = create_options(new = "changeworst", quantity = 2)  # changes the 2 worst performing
+    # organisms of each candidate every generation
 
     # 3.3 Run the Optimization
     ea_optim_result = comm_model.ea(
@@ -89,3 +110,6 @@ if __name__ == "__main__":
         )
 
     print("Best Solution: ", ea_optim_result)
+    print("Organisms present in solution:")
+    for indx in ea_optim_result.rep:
+        print("\t", model_list[indx])

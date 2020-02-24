@@ -222,7 +222,6 @@ def ea_run(
     gens = 0
     exit_flag = False
     while not exit_flag:
-        print("flag")
         evaluate(cmodel, popu, obj_list, cons, quantity, fit_reacs)
         best_score = max([candi.score for candi in popu])
         if goal and (best_score > goal):
