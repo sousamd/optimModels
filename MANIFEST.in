@@ -1,0 +1,18 @@
+include *.md
+include LICENSE
+recursive-include doc *.buildinfo
+recursive-include doc *.css
+recursive-include doc *.doctree
+recursive-include doc *.gif
+recursive-include doc *.html
+recursive-include doc *.inv
+recursive-include doc *.js
+recursive-include doc *.pickle
+recursive-include doc *.png
+recursive-include doc *.py
+recursive-include doc *.rst
+recursive-include doc *.sh
+recursive-include doc *.txt
+recursive-include doc Makefile
+recursive-include images *.png
+recursive-include src *.xml
