@@ -1,3 +1,5 @@
+import os
+import optimModels
 from collections import OrderedDict
 from optimModels.utils.constantes import optimType
 from optimModels.optimization.run import kinetic_strain_optim
@@ -12,7 +14,12 @@ def build_chassaganole_map():
     auxiliary function for the chassagnole model parameter map
     :return dict: paramter map in the format {reaction id: [parameter id, ...], ...}
     """
-    model1 = load_kinetic_model(filename = r"..\..\..\examples\models\chassagnole2002.xml", kmap = {})
+
+    optimmodels_path = os.path.dirname(optimModels.__file__)
+    example_chassagnole_path = os.path.join(optimmodels_path, "examples", "models", "chassagnole2002.xml")
+
+    model1 = load_kinetic_model(filename = example_chassagnole_path, kmap = {})
+    # model1 = load_kinetic_model(filename = models_path + "chassagnole2002.xml", kmap = {})
     parameters = list(model1.get_parameters())
     params = parameters[10:]
 
@@ -64,7 +71,8 @@ def kinetic_optimization(model, optim_type, eval_func, **kwargs):
 if __name__ == "__main__":
     # First Step:
     # Loading the model
-    example_chassagnole_path = r"..\..\..\examples\models\chassagnole2002.xml"
+    optimmodels_path = os.path.dirname(optimModels.__file__)
+    example_chassagnole_path = os.path.join(optimmodels_path, "examples", "models", "chassagnole2002.xml")
     example_chassagnole_kmap = build_chassaganole_map()
     ex_kinetic_model = load_kinetic_model(
         filename = example_chassagnole_path,

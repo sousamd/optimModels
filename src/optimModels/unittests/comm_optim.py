@@ -6,6 +6,13 @@ from optimModels.comm_optim.ea_setup import change_config
 
 
 def create_options(first = "random", new = "tourn", **kwargs):
+    """
+    auxilliary function to create the options parameter for ea
+    :param str first: "random" or "headtstart"
+    :param str new: "tourn", "keep", or "changeworst"
+    :param kwargs: aditional parameters
+    :return:
+    """
     sample = kwargs.get("sample", [])
     quantity = kwargs.get("quantity", 1)
 
@@ -34,7 +41,7 @@ if __name__ == "__main__":
     # All of the models should be loaded in the same notation style
     # The 10 models loaded below were arbitrarily chosen
     optimmodels_path = os.path.dirname(optimModels.__file__)
-    models_path = os.path.abspath(os.path.join(optimmodels_path, os.pardir, os.pardir, "examples", "models"))
+    models_path = os.path.abspath(os.path.join(optimmodels_path, "examples", "models"))
 
     model1 = "Yokenella_regensburgei_ATCC_43003.xml"
     model2 = "Acinetobacter_junii_SH205.xml"
@@ -96,7 +103,9 @@ if __name__ == "__main__":
         first = "headstart",
         new = "keep",
         sample = [0, 2])
-    options_3 = create_options(new = "changeworst", quantity = 2)  # changes the 2 worst performing
+    options_3 = create_options(
+        new = "changeworst",
+        quantity = 2)  # changes the 2 worst performing
     # organisms of each candidate every generation
 
     # 3.3 Run the Optimization

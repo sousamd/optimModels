@@ -1,5 +1,7 @@
+import os
 import cobra
 import framed
+import optimModels
 from cobra.io import read_sbml_model
 from framed.io.sbml import load_cbmodel
 from optimModels.utils.configurations import StoicConfigurations
@@ -62,7 +64,8 @@ def stoic_simulation(model, **kwargs):
 if __name__ == "__main__":
     # First Step
     # Load the Model
-    ecoli_model = r"..\..\..\examples\models\Ec_iAF1260.xml"  # path to the model file
+    optimmodels_path = os.path.dirname(optimModels.__file__)
+    ecoli_model = os.path.join(optimmodels_path, "examples", "models", "Ec_iAF1260.xml")  # path to the model file
     # Option 1: Cobra
     cobra_model = read_sbml_model(filename = ecoli_model)
 

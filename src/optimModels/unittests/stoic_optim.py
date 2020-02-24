@@ -1,3 +1,5 @@
+import os
+import optimModels
 from framed import load_cbmodel
 from optimModels.utils.constantes import optimType
 from optimModels.optimization.run import cbm_strain_optim
@@ -56,7 +58,8 @@ def stoic_optimization(model, optim_type, eval_func, **kwargs):
 if __name__ == "__main__":
     # First Step
     # Load the Model: Cobra or Framed
-    ecoli_model = r"..\..\..\examples\models\Ec_iAF1260.xml"  # path to the model file
+    optimmodels_path = os.path.dirname(optimModels.__file__)
+    ecoli_model = os.path.join(optimmodels_path, "examples", "models", "Ec_iAF1260.xml")  # path to the model file
     framed_model = load_cbmodel(filename = ecoli_model, flavor = "cobra")
 
     # Second Step

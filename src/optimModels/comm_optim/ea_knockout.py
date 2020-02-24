@@ -246,36 +246,4 @@ def ea_run(
 
 
 if __name__ == "__main__":
-    start = time.process_time()
-
-    direc = "../agora_models_sbml2/"
-
-    model1 = "Yokenella_regensburgei_ATCC_43003.xml"
-    model2 = "Acinetobacter_junii_SH205.xml"
-    model3 = "Clostridiales_sp_1_7_47FAA.xml"
-    model4 = "Achromobacter_xylosoxidans_A8.xml"
-    model5 = "Achromobacter_xylosoxidans_NBRC_15126.xml"
-    model6 = "Acidaminococcus_intestini_RyC_MR95.xml"
-    model7 = "Acidaminococcus_sp_D21.xml"
-    model8 = "Acinetobacter_calcoaceticus_PHEA_2.xml"
-    model9 = "Acinetobacter_lwoffii_WJ10621.xml"
-    model10 = "Actinobacillus_pleuropneumoniae_L20.xml"
-
-    model_list = [model1, model2, model3, model4, model5, model6, model7, model8, model9, model10]
-
-    # all_models = open("unique_models100.txt")
-    # all_models_list = [i.rstrip()[1:-1] for i in all_models.readlines()]
-    # list_models = [load_cbmodel(filename = direc + model, flavor = "cobra:other") for model in all_models_list]
-
-    list_models = [load_cbmodel(filename = direc + model, flavor = "cobra:other") for model in model_list]
-    objective = ['R_EX_M_succ__91__e__93___e_pool']
-
-    options = [("random", [1, 0, 1, 0, 0, 0, 0, 0, 0]), ("tourn", 1)]
-    fit = "R_EX_M_taur__91__e__93___e_pool"
-
-    res = ea_run(options, list_models, quantity = 3, obj_list = [], fitness = None, goal = None)
-    print("~~~~")
-    print(res)
-
-    end = time.process_time() - start
-    print(end)
+    pass

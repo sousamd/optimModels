@@ -1,3 +1,5 @@
+import os
+import optimModels
 from optimModels.model.kineticModel import load_kinetic_model
 from optimModels.simulation.override_simul_problem import OverrideKineticSimulProblem
 from optimModels.simulation.simul_problems import KineticSimulationProblem
@@ -21,7 +23,8 @@ def kinetic_simulation(kinet_model, factors, **kwargs):
 if __name__ == "__main__":
     # First Step:
     # Loading the model
-    example_chassagnole_path = r"..\..\..\examples\models\chassagnole2002.xml"
+    optimmodels_path = os.path.dirname(optimModels.__file__)
+    example_chassagnole_path = os.path.join(optimmodels_path, "examples", "models", "chassagnole2002.xml")
     ex_kinetic_model = load_kinetic_model(filename = example_chassagnole_path, kmap = {})
 
     # Second Step

@@ -248,43 +248,10 @@ if __name__ == "__main__":
 
     list_models = [load_cbmodel(filename = str(os.path.join(models_path, model)),
                                 flavor = "cobra:other") for model in model_list]
-    list_models2 = deepcopy(list_models)
-    # test_options = [("random", [1, 0, 1, 0, 0, 0, 0, 0, 0]), ("tourn", 1)]
     fit = "R_EX_M_taur__91__e__93___e_pool"
     test_reac = "R_EX_M_succ__91__e__93___e_pool"
-    result = [1, 1, 0, 1, 0, 1, 0, 1, 0, 1]
-    result_0 = [res for res in range(len(result)) if result[res] == 0]
-    result_1 = [res for res in range(len(result)) if result[res] == 1]
 
     create_cm = CModel("testing", list_models)
     run_options = [("random", [1, 0, 1, 0, 0, 0, 0, 0, 0]), ("tourn", 1)]
     ea_run = create_cm.ea(options = run_options, quantity = 3, obj_list = [], fitness = None, goal = None)
     print(ea_run)
-
-    # # TEST KO
-    # test_cm = CModel("test_cm", list_models)
-    # unused_models = [test_cm.models[i].id for i in result_0]
-    # ko_test = test_cm.knockout(list_of_model_ids = unused_models)
-    # print("ko test: ", "\nfobj: ", ko_test.fobj, "\nreac: ", ko_test.values[fit])
-    #
-    # print("------")
-    # pred_reacs = get_predecessor_reacs(test_cm.cmodel, test_reac)
-    # test_sum = 0
-    # for reaction in pred_reacs:
-    #     print(reaction, ": ", ko_test.values[reaction])
-    #     test_sum += ko_test.values[reaction]
-    # print("sum: {}".format(test_sum), "\n")
-
-    # import csv
-    # with open("comparing_fba.csv", mode = "a") as comparing_file:
-    #     comparing_writer = csv.writer(comparing_file, delimiter = "\t", quotechar = '"', quoting = csv.QUOTE_NONE)
-    #
-    #     for reaction in ko_test.values:
-    #         compars = list(test_cm.cmodel.get_reaction_compartments(reaction))
-    #         if len(compars) == 1:
-    #             comparts = (compars[0], "nul")
-    #         elif len(compars) == 2:
-    #             comparts = (compars[0], compars[1])
-    #         bounds = (test_cm.cmodel.reactions[reaction].lb,  test_cm.cmodel.reactions[reaction].ub)
-    #         comparing_writer.writerow(["ko", comparts[0], comparts[1], reaction, bounds, ko_test.values[reaction]])
-    #         print("ko", comparts[0], comparts[1], reaction, bounds, ko_test.values[reaction])

@@ -1,5 +1,5 @@
 optimModels
-======
+============
 
 Optimization Models Framework
 The Python framework under development will allow the strain design of single and microbial community cultures.
